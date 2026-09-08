@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
                 )
         }
 )
-public class Venta {
+public class Ventas {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,7 +58,7 @@ public class Venta {
     private String observacion;
 
 
-    public Venta() {
+    public Ventas() {
     }
 
 

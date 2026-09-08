@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "orden_servicio")
-public class Orden_Servicio {
+public class OrdenServicio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,7 +64,7 @@ public class Orden_Servicio {
 
 
     // Constructor vacío
-    public Orden_Servicio() {
+    public OrdenServicio() {
     }
 
 

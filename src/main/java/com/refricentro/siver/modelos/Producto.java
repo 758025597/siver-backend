@@ -34,7 +34,7 @@ import com.refricentro.siver.modelos.enums.UnidadMedida;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Producto {
+public class Producto implements Activable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

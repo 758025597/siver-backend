@@ -29,7 +29,7 @@ import org.hibernate.generator.EventType;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Usuario {
+public class Usuario implements Activable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

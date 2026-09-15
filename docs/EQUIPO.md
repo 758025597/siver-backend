@@ -62,13 +62,112 @@ Los tres casos a explicar en la sustentacion:
 Se reparte por MODULO, no por entidad suelta, porque hay entidades que
 tienen que hacerse juntas (venta y detalle_venta comparten triggers).
 
-| # | Modulo | Entidades | Peso |
-|---|---|---|---|
-| 1 | Seguridad | rol, usuario | Media |
-| 2 | Maestros | categoria, proveedor, cliente | Media (3 simples, mismo patron) |
-| 3 | Inventario | producto, movimiento_inventario | Alta (producto es la mas pesada) |
-| 4 | Ventas | venta, detalle_venta | Alta (triggers y anulacion) |
-| 5 | Servicio tecnico | estado_orden, orden_servicio | Media |
+| # | Modulo | Responsable | Rama | Entidades | Archivos |
+|---|---|---|---|---|---|
+| 1 | Seguridad | __________ | `feature/seguridad` | rol, usuario | 12 |
+| 2 | Maestros | __________ | `feature/maestros` | categoria, proveedor, cliente | 18 |
+| 3 | Inventario | __________ | `feature/inventario` | producto, movimiento_inventario | 11 |
+| 4 | Ventas | __________ | `feature/ventas` | venta, detalle_venta | 9 |
+| 5 | Servicio tecnico | __________ | `feature/servicio-tecnico` | estado_orden, orden_servicio | 12 |
+
+Esta parejo: el modulo 2 tiene mas archivos pero son repetitivos, y el 4
+tiene menos archivos pero la logica mas dificil.
+
+### Regla general: 6 archivos por entidad
+
+```
+repository/XRepository.java
+service/XService.java
+service/impl/XServiceImpl.java
+controller/XController.java
+dto/XRequest.java
+dto/XResponse.java
+```
+
+### Modulo 1 - Seguridad  (rol, usuario)
+
+```
+repository/RolRepository.java          repository/UsuarioRepository.java
+service/RolService.java                service/UsuarioService.java
+service/impl/RolServiceImpl.java       service/impl/UsuarioServiceImpl.java
+controller/RolController.java          controller/UsuarioController.java
+dto/RolRequest.java                    dto/UsuarioRequest.java
+dto/RolResponse.java                   dto/UsuarioResponse.java
+```
+
+CUIDADO: `UsuarioResponse` NO puede llevar el campo `clave`. Si devuelves la
+entidad tal cual, la API publica las contrasenas de todos.
+El DELETE de ambas es SOFT (columna `activo`).
+
+### Modulo 2 - Maestros  (categoria, proveedor, cliente)
+
+Los 6 archivos de siempre, por cada una de las tres. Son 18 en total, pero
+las tres son casi identicas: haz `categoria` completa, y las otras dos salen
+copiando el patron.
+Las tres llevan DELETE SOFT (columna `activo`).
+
+Detalle de cada una:
+- categoria  -> nombre es UNIQUE, validar duplicado antes de crear
+- proveedor  -> `ruc` es CHAR(11) y UNIQUE, validar 11 digitos
+- cliente    -> `tipo_documento` es ENUM('DNI','RUC','CE')
+
+### Modulo 3 - Inventario  (producto, movimiento_inventario)
+
+```
+producto  -> los 6 archivos completos
+movimiento_inventario -> SOLO 5, sin XRequest:
+    repository/MovimientoInventarioRepository.java
+    service/MovimientoInventarioService.java
+    service/impl/MovimientoInventarioServiceImpl.java
+    controller/MovimientoInventarioController.java
+    dto/MovimientoInventarioResponse.java
+```
+
+Por que `movimiento_inventario` no lleva Request: es una BITACORA. No se crea
+a mano, la escriben los triggers de MySQL. Solo se consulta.
+
+CUIDADO con `producto`: el stock lo modifican los triggers por detras. Si
+cargas un Producto en memoria y lo guardas despues de una venta, escribes el
+stock viejo y borras lo que hizo el trigger. Siempre recargar antes de guardar.
+Ademas hay un CHECK: precio_venta >= precio_compra.
+
+### Modulo 4 - Ventas  (venta, detalle_venta)
+
+```
+venta -> los 6 archivos, PERO:
+    en vez de DELETE /ventas/{id}  va  PATCH /ventas/{id}/anular
+    (cambia estado a ANULADA, no borra)
+
+detalle_venta -> solo 3, sin controlador propio:
+    repository/DetalleVentaRepository.java
+    dto/DetalleVentaRequest.java    (va dentro de VentaRequest)
+    dto/DetalleVentaResponse.java   (va dentro de VentaResponse)
+```
+
+Por que `venta` no se borra ni se edita: es un comprobante tributario.
+Una boleta emitida no se corrige, se ANULA y se emite otra.
+
+Por que `detalle_venta` no tiene CRUD propio: se crea junto con su venta, y
+sus triggers ya descontaron el stock. Borrar una linea suelta dejaria el
+stock descuadrado para siempre.
+
+El trigger valida el stock: si no alcanza, MySQL lanza
+'Stock insuficiente para completar la venta'. Ese error hay que atraparlo
+en el manejador global y devolverlo como 400, no como 500.
+
+### Modulo 5 - Servicio tecnico  (estado_orden, orden_servicio)
+
+```
+estado_orden     -> los 6 archivos.  UNICO caso de DELETE FISICO (hard)
+orden_servicio   -> los 6 archivos.  DELETE SOFT via id_estado
+```
+
+Por que `estado_orden` si admite hard delete: es un catalogo fijo de 4 o 5
+filas y es la unica tabla sin columna `activo`. Igual solo se podra borrar un
+estado que ninguna orden este usando, porque la FK es ON DELETE RESTRICT.
+
+CUIDADO con `orden_servicio`: tiene el trigger `trg_orden_before_update`, que
+pone `fecha_entrega_real` sola cuando la orden pasa a un estado final.
 
 ## 4. ORDEN DE TRABAJO (importante)
 

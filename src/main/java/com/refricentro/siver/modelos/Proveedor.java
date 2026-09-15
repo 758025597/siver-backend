@@ -7,7 +7,7 @@ import org.hibernate.generator.EventType;
 
 @Entity
 @Table(name = "proveedor")
-public class Proveedor {
+public class Proveedor implements Activable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

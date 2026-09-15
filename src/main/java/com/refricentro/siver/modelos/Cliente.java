@@ -12,7 +12,7 @@ import org.hibernate.generator.EventType;
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 
-public class Cliente {
+public class Cliente implements Activable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

@@ -1,4 +1,4 @@
-package Model;
+package com.refricentro.siver.modelos;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,23 +6,22 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
-
 @Data
 @Entity
-@Table(name = "Rol")
+@Table(name = "categorias")
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Rol {
+public class Categoria {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private Long idRol;
+    private Long idCat;
 
-    @Column(nullable = false, length = 50, unique = true)
+    @Column(nullable = false, length = 100, unique = true)
     private String nombre;
 
-    @Column(length = 100)
+    @Column(length = 255)  // Le pongo 255 porque es más común
     private String descripcion;
 
     @Column(nullable = false)
@@ -30,5 +29,4 @@ public class Rol {
 
     @Column(updatable = false)
     private LocalDateTime fechaRegistro;
-
 }

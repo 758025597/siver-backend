@@ -1,4 +1,4 @@
-package com.refricentro.siver.Entity;
+package com.refricentro.siver.modelos;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
                 )
         }
 )
-public class Ventas {
+public class Venta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,7 +58,7 @@ public class Ventas {
     private String observacion;
 
 
-    public Ventas() {
+    public Venta() {
     }
 
 

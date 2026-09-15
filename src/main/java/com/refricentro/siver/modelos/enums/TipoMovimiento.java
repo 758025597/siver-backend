@@ -1,4 +1,4 @@
-package com.refricentro.siver.entity;
+package com.refricentro.siver.modelos;
 
 public enum TipoMovimiento {
     ENTRADA,

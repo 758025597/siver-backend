@@ -1,4 +1,4 @@
-package Model;
+package com.refricentro.siver.modelos;
 
 import jakarta.persistence.*;
 import lombok.*;

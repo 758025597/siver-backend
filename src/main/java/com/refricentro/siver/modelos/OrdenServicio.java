@@ -1,4 +1,4 @@
-package com.refricentro.siver.Entity;
+package com.refricentro.siver.modelos;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;

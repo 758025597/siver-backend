@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Entity
 @Table(name = "movimiento_inventario")
@@ -31,7 +33,8 @@ public class MovimientoInventario {
     private Integer idVenta;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_movimiento", nullable = false)
+    @Column(name = "tipo_movimiento", nullable = false,
+            columnDefinition = "ENUM('ENTRADA','SALIDA','AJUSTE')")
     private TipoMovimiento tipoMovimiento;
 
     @Column(name = "cantidad", nullable = false)
@@ -46,6 +49,7 @@ public class MovimientoInventario {
     @Column(name = "motivo", length = 200)
     private String motivo;
 
+    @Generated(event = EventType.INSERT)
     @Column(name = "fecha_movimiento", nullable = false)
     private LocalDateTime fechaMovimiento;
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Entity
 @Table(name = "orden_servicio")
@@ -38,7 +40,7 @@ public class OrdenServicio {
     @Column(name = "numero_serie", length = 60)
     private String numeroSerie;
 
-    @Column(name = "descripcion_falla", columnDefinition = "TEXT")
+    @Column(name = "descripcion_falla", nullable = false, columnDefinition = "TEXT")
     private String descripcionFalla;
 
     @Column(name = "diagnostico", columnDefinition = "TEXT")
@@ -47,6 +49,7 @@ public class OrdenServicio {
     @Column(name = "trabajo_realizado", columnDefinition = "TEXT")
     private String trabajoRealizado;
 
+    @Generated(event = EventType.INSERT)
     @Column(name = "fecha_ingreso", nullable = false)
     private LocalDateTime fechaIngreso;
 
@@ -56,8 +59,8 @@ public class OrdenServicio {
     @Column(name = "fecha_entrega_real")
     private LocalDateTime fechaEntregaReal;
 
-    @Column(name = "costo_estimado", precision = 10, scale = 2)
-    private BigDecimal costoEstimado;
+    @Column(name = "costo_estimado", nullable = false, precision = 10, scale = 2)
+    private BigDecimal costoEstimado = BigDecimal.ZERO;
 
     @Column(name = "costo_final", precision = 10, scale = 2)
     private BigDecimal costoFinal;

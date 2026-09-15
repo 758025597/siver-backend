@@ -42,7 +42,7 @@ public class DetalleVenta {
     private BigDecimal precioUnitario;
 
     @Column(name = "descuento", nullable = false, precision = 10, scale = 2)
-    private BigDecimal descuento;
+    private BigDecimal descuento = BigDecimal.ZERO;
 
     @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;

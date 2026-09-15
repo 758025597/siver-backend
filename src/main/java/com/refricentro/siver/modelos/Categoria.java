@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 @Data
 @Entity
-@Table(name = "categorias")
+@Table(name = "categoria")
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -16,7 +18,8 @@ public class Categoria {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private Long idCat;
+    @Column(name = "id_categoria")
+    private Integer idCat;
 
     @Column(nullable = false, length = 100, unique = true)
     private String nombre;
@@ -27,6 +30,7 @@ public class Categoria {
     @Column(nullable = false)
     private Boolean activo = true;
 
-    @Column(updatable = false)
+    @Generated(event = EventType.INSERT)
+    @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;
 }

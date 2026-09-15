@@ -3,6 +3,8 @@ package com.refricentro.siver.modelos;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Entity
 @Table(
@@ -25,8 +27,9 @@ public class Venta {
     private String numeroComprobante;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_comprobante", nullable = false)
-    private TipoComprobante tipoComprobante;
+    @Column(name = "tipo_comprobante", nullable = false,
+            columnDefinition = "ENUM('BOLETA','FACTURA','NOTA_VENTA')")
+    private TipoComprobante tipoComprobante = TipoComprobante.BOLETA;
 
     @Column(name = "id_cliente", nullable = false)
     private Integer idCliente;
@@ -34,25 +37,28 @@ public class Venta {
     @Column(name = "id_usuario", nullable = false)
     private Integer idUsuario;
 
+    @Generated(event = EventType.INSERT)
     @Column(name = "fecha_venta", nullable = false)
     private LocalDateTime fechaVenta;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "metodo_pago", nullable = false)
-    private MetodoPago metodoPago;
+    @Column(name = "metodo_pago", nullable = false,
+            columnDefinition = "ENUM('EFECTIVO','TARJETA','YAPE','PLIN','TRANSFERENCIA')")
+    private MetodoPago metodoPago = MetodoPago.EFECTIVO;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal subtotal;
+    @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
+    private BigDecimal subtotal = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal igv;
+    @Column(name = "igv", nullable = false, precision = 10, scale = 2)
+    private BigDecimal igv = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal total;
+    @Column(name = "total", nullable = false, precision = 10, scale = 2)
+    private BigDecimal total = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private EstadoVenta estado;
+    @Column(name = "estado", nullable = false,
+            columnDefinition = "ENUM('EMITIDA','ANULADA')")
+    private EstadoVenta estado = EstadoVenta.EMITIDA;
 
     @Column(name = "observacion", length = 300)
     private String observacion;

@@ -4,6 +4,7 @@ import com.refricentro.siver.modelos.Activable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 /**
  * Igual que ServicioGenerico, pero con BORRADO LOGICO (soft delete).
  *
@@ -25,6 +26,13 @@ public abstract class ServicioSoftDelete<T extends Activable, ID>
         super(repositorio);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<T> listar() {
+        return repositorio.findAll().stream()
+                .filter(entidad -> Boolean.TRUE.equals(entidad.getActivo()))
+                .toList();
+    }
     /**
      * BORRADO LOGICO: el registro se queda en la tabla con activo = false.
      *

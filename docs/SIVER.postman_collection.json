@@ -1,0 +1,204 @@
+{
+  "info": {
+    "name": "SIVER - Refricentro Peregrino",
+    "description": "Coleccion de evidencias para la T1. El login guarda el token solo; las demas peticiones lo usan automaticamente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "00 - Seguridad (evidencia clave)",
+      "item": [
+        {
+          "name": "1. SIN token -> 401",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] },
+            "description": "Demuestra que la API esta protegida. Debe responder 401 con un JSON explicando que falta el token."
+          }
+        },
+        {
+          "name": "2. Login con clave incorrecta -> 401",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"correo\": \"admin@refricentro.pe\",\n  \"clave\": \"claveMala123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "description": "No revela si fallo el correo o la clave."
+          }
+        },
+        {
+          "name": "3. Login correcto -> token (guarda {{token}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('token', data.token);",
+                  "    console.log('Token guardado. Rol: ' + data.rol);",
+                  "}",
+                  "pm.test('Login correcto', () => pm.response.to.have.status(200));",
+                  "pm.test('Devuelve token', () => pm.expect(pm.response.json().token).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"correo\": \"admin@refricentro.pe\",\n  \"clave\": \"Admin2026\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "description": "EJECUTAR ESTA PRIMERO. Guarda el token en la variable de coleccion."
+          }
+        },
+        {
+          "name": "4. CON token -> 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] },
+            "description": "La misma peticion de la prueba 1, ahora con el token: responde 200."
+          }
+        },
+        {
+          "name": "5. Token adulterado -> 401",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}X", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] },
+            "description": "Una sola letra cambiada invalida la firma del JWT."
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Rol",
+      "item": [
+        { "name": "GET todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] } } },
+        { "name": "GET por id", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/roles/1", "host": ["{{baseUrl}}"], "path": ["api", "roles", "1"] } } },
+        { "name": "GET activos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/roles/activos", "host": ["{{baseUrl}}"], "path": ["api", "roles", "activos"] } } },
+        { "name": "POST crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Supervisor\",\n  \"descripcion\": \"Supervisa las operaciones de tienda\"\n}" }, "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] } } },
+        { "name": "PUT actualizar", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Supervisor\",\n  \"descripcion\": \"Descripcion actualizada\"\n}" }, "url": { "raw": "{{baseUrl}}/api/roles/4", "host": ["{{baseUrl}}"], "path": ["api", "roles", "4"] } } },
+        { "name": "DELETE (soft delete)", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/roles/4", "host": ["{{baseUrl}}"], "path": ["api", "roles", "4"] }, "description": "204. Verificar despues con GET por id: activo queda en false, el registro sigue existiendo." } }
+      ]
+    },
+    {
+      "name": "02 - Usuario",
+      "item": [
+        { "name": "GET todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/usuarios", "host": ["{{baseUrl}}"], "path": ["api", "usuarios"] } } },
+        { "name": "GET activos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/usuarios/activos", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "activos"] } } },
+        { "name": "POST crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idRol\": 1,\n  \"nombres\": \"Ruth Alexandra\",\n  \"apellidos\": \"Alvarez Surco\",\n  \"dni\": \"70123456\",\n  \"correo\": \"ruth@refricentro.pe\",\n  \"clave\": \"Siver2026\",\n  \"telefono\": \"912345678\"\n}" }, "url": { "raw": "{{baseUrl}}/api/usuarios", "host": ["{{baseUrl}}"], "path": ["api", "usuarios"] }, "description": "La clave se guarda cifrada con BCrypt; la respuesta nunca la devuelve." } },
+        { "name": "VALIDACION: DNI de 5 digitos -> 400", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"idRol\": 1,\n  \"nombres\": \"Prueba\",\n  \"apellidos\": \"Validacion\",\n  \"dni\": \"12345\",\n  \"correo\": \"prueba@refricentro.pe\",\n  \"clave\": \"Siver2026\",\n  \"telefono\": \"912345678\"\n}" }, "url": { "raw": "{{baseUrl}}/api/usuarios", "host": ["{{baseUrl}}"], "path": ["api", "usuarios"] } } },
+        { "name": "DELETE (soft delete)", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/usuarios/2", "host": ["{{baseUrl}}"], "path": ["api", "usuarios", "2"] } } }
+      ]
+    },
+    {
+      "name": "03 - Categoria",
+      "item": [
+        { "name": "GET todas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/categorias", "host": ["{{baseUrl}}"], "path": ["api", "categorias"] } } },
+        { "name": "GET activas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/categorias/activos", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "activos"] } } },
+        { "name": "POST crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Congeladoras\",\n  \"descripcion\": \"Equipos de congelacion comercial\"\n}" }, "url": { "raw": "{{baseUrl}}/api/categorias", "host": ["{{baseUrl}}"], "path": ["api", "categorias"] } } },
+        { "name": "DELETE (soft delete)", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/categorias/7", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "7"] } } }
+      ]
+    },
+    {
+      "name": "04 - Proveedor",
+      "item": [
+        { "name": "GET todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/proveedores", "host": ["{{baseUrl}}"], "path": ["api", "proveedores"] } } },
+        { "name": "GET activos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/proveedores/activos", "host": ["{{baseUrl}}"], "path": ["api", "proveedores", "activos"] } } },
+        { "name": "POST crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"ruc\": \"20601234567\",\n  \"razonSocial\": \"Friotec Importaciones SAC\",\n  \"contacto\": \"Luis Ramirez\",\n  \"telefono\": \"014567890\",\n  \"correo\": \"ventas@friotec.pe\",\n  \"direccion\": \"Av. Argentina 1520, Callao\"\n}" }, "url": { "raw": "{{baseUrl}}/api/proveedores", "host": ["{{baseUrl}}"], "path": ["api", "proveedores"] }, "description": "El telefono admite fijo (9 digitos) porque un proveedor es una empresa." } },
+        { "name": "VALIDACION: RUC de 8 digitos -> 400", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"ruc\": \"20601234\",\n  \"razonSocial\": \"RUC invalido SAC\",\n  \"contacto\": \"Prueba\",\n  \"telefono\": \"014567890\",\n  \"correo\": \"prueba@friotec.pe\",\n  \"direccion\": \"Av. Prueba 100\"\n}" }, "url": { "raw": "{{baseUrl}}/api/proveedores", "host": ["{{baseUrl}}"], "path": ["api", "proveedores"] } } }
+      ]
+    },
+    {
+      "name": "05 - Cliente",
+      "item": [
+        { "name": "GET todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api", "clientes"] } } },
+        { "name": "GET activos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/clientes/activos", "host": ["{{baseUrl}}"], "path": ["api", "clientes", "activos"] } } },
+        { "name": "POST crear (DNI)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipoDocumento\": \"DNI\",\n  \"numeroDocumento\": \"45678912\",\n  \"nombres\": \"Carmen Rosa Quispe\",\n  \"telefono\": \"987654321\",\n  \"correo\": \"carmen.quispe@gmail.com\",\n  \"direccion\": \"Jr. Puno 345, Lima\"\n}" }, "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api", "clientes"] } } },
+        { "name": "POST crear (RUC)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipoDocumento\": \"RUC\",\n  \"numeroDocumento\": \"20554433221\",\n  \"nombres\": \"Hotel Costa Azul SAC\",\n  \"telefono\": \"987111222\",\n  \"correo\": \"admin@costaazul.pe\",\n  \"direccion\": \"Av. Larco 890, Miraflores\"\n}" }, "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api", "clientes"] }, "description": "Solo un cliente con RUC puede recibir FACTURA." } },
+        { "name": "VALIDACION: DNI con 11 digitos -> 400", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"tipoDocumento\": \"DNI\",\n  \"numeroDocumento\": \"20554433221\",\n  \"nombres\": \"Documento incoherente\",\n  \"telefono\": \"987654321\",\n  \"correo\": \"prueba@gmail.com\",\n  \"direccion\": \"Jr. Prueba 100\"\n}" }, "url": { "raw": "{{baseUrl}}/api/clientes", "host": ["{{baseUrl}}"], "path": ["api", "clientes"] }, "description": "Regla cruzada con @AssertTrue: el largo del numero debe coincidir con el tipo de documento." } }
+      ]
+    },
+    {
+      "name": "06 - Producto",
+      "item": [
+        { "name": "GET todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/productos", "host": ["{{baseUrl}}"], "path": ["api", "productos"] } } },
+        { "name": "GET activos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/productos/activos", "host": ["{{baseUrl}}"], "path": ["api", "productos", "activos"] } } },
+        { "name": "GET stock bajo", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/productos/stock-bajo", "host": ["{{baseUrl}}"], "path": ["api", "productos", "stock-bajo"] }, "description": "Productos cuyo stock cayo por debajo del minimo. Consulta de negocio, no CRUD." } },
+        { "name": "POST crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"PRD-001\",\n  \"nombre\": \"Compresor 1HP\",\n  \"descripcion\": \"Compresor hermetico para refrigeracion comercial\",\n  \"idCategoria\": 1,\n  \"idProveedor\": 1,\n  \"unidadMedida\": \"UNIDAD\",\n  \"precioCompra\": 180.00,\n  \"precioVenta\": 300.00,\n  \"stock\": 30,\n  \"stockMinimo\": 5\n}" }, "url": { "raw": "{{baseUrl}}/api/productos", "host": ["{{baseUrl}}"], "path": ["api", "productos"] } } },
+        { "name": "VALIDACION: precio venta < compra -> 400", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"PRD-999\",\n  \"nombre\": \"Producto con margen negativo\",\n  \"descripcion\": \"Prueba de regla de negocio\",\n  \"idCategoria\": 1,\n  \"idProveedor\": 1,\n  \"unidadMedida\": \"UNIDAD\",\n  \"precioCompra\": 300.00,\n  \"precioVenta\": 180.00,\n  \"stock\": 10,\n  \"stockMinimo\": 2\n}" }, "url": { "raw": "{{baseUrl}}/api/productos", "host": ["{{baseUrl}}"], "path": ["api", "productos"] }, "description": "Nadie vende mas barato de lo que compra." } },
+        { "name": "PUT actualizar (el stock NO se toca)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"PRD-001\",\n  \"nombre\": \"Compresor 1HP Premium\",\n  \"descripcion\": \"Descripcion actualizada\",\n  \"idCategoria\": 1,\n  \"idProveedor\": 1,\n  \"unidadMedida\": \"UNIDAD\",\n  \"precioCompra\": 180.00,\n  \"precioVenta\": 320.00,\n  \"stock\": 999,\n  \"stockMinimo\": 5\n}" }, "url": { "raw": "{{baseUrl}}/api/productos/1", "host": ["{{baseUrl}}"], "path": ["api", "productos", "1"] }, "description": "Aunque se mande stock 999, el stock real NO cambia: solo lo mueven las ventas y los movimientos de inventario. Evita corromper el inventario." } },
+        { "name": "DELETE (soft delete)", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/productos/1", "host": ["{{baseUrl}}"], "path": ["api", "productos", "1"] }, "description": "Soft delete: el producto sale del catalogo pero sus ventas historicas siguen siendo legibles." } }
+      ]
+    },
+    {
+      "name": "07 - Venta (reglas de negocio)",
+      "item": [
+        { "name": "GET todas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/ventas", "host": ["{{baseUrl}}"], "path": ["api", "ventas"] } } },
+        { "name": "GET por id", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/ventas/1", "host": ["{{baseUrl}}"], "path": ["api", "ventas", "1"] } } },
+        { "name": "GET por cliente", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/ventas/cliente/1", "host": ["{{baseUrl}}"], "path": ["api", "ventas", "cliente", "1"] } } },
+        { "name": "GET por vendedor", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/ventas/vendedor/1", "host": ["{{baseUrl}}"], "path": ["api", "ventas", "vendedor", "1"] } } },
+        { "name": "POST registrar venta (calcula IGV y baja stock)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"numeroComprobante\": \"B001-000045\",\n  \"tipoComprobante\": \"BOLETA\",\n  \"idCliente\": 1,\n  \"idUsuario\": 1,\n  \"metodoPago\": \"EFECTIVO\",\n  \"observacion\": \"Venta de mostrador\",\n  \"detalles\": [\n    {\n      \"idProducto\": 1,\n      \"cantidad\": 2,\n      \"precioUnitario\": 300.00,\n      \"descuento\": 0\n    }\n  ]\n}" }, "url": { "raw": "{{baseUrl}}/api/ventas", "host": ["{{baseUrl}}"], "path": ["api", "ventas"] }, "description": "EVIDENCIA FUERTE: no se envian subtotal ni IGV ni total. La respuesta los trae calculados (IGV 18%), el stock del producto baja solo y se escribe un movimiento de inventario SALIDA. Todo eso lo hacen triggers en MySQL." } },
+        { "name": "REGLA: stock insuficiente -> 400", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"numeroComprobante\": \"B001-000099\",\n  \"tipoComprobante\": \"BOLETA\",\n  \"idCliente\": 1,\n  \"idUsuario\": 1,\n  \"metodoPago\": \"EFECTIVO\",\n  \"observacion\": \"Prueba de stock\",\n  \"detalles\": [\n    {\n      \"idProducto\": 1,\n      \"cantidad\": 9999,\n      \"precioUnitario\": 300.00,\n      \"descuento\": 0\n    }\n  ]\n}" }, "url": { "raw": "{{baseUrl}}/api/ventas", "host": ["{{baseUrl}}"], "path": ["api", "ventas"] } } },
+        { "name": "REGLA: FACTURA a cliente con DNI -> 400", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"numeroComprobante\": \"F001-000010\",\n  \"tipoComprobante\": \"FACTURA\",\n  \"idCliente\": 1,\n  \"idUsuario\": 1,\n  \"metodoPago\": \"EFECTIVO\",\n  \"observacion\": \"Prueba comprobante\",\n  \"detalles\": [\n    {\n      \"idProducto\": 1,\n      \"cantidad\": 1,\n      \"precioUnitario\": 300.00,\n      \"descuento\": 0\n    }\n  ]\n}" }, "url": { "raw": "{{baseUrl}}/api/ventas", "host": ["{{baseUrl}}"], "path": ["api", "ventas"] }, "description": "Usar un idCliente cuyo tipoDocumento sea DNI. Solo se factura a RUC." } },
+        { "name": "REGLA: producto repetido en dos lineas -> 400", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"numeroComprobante\": \"B001-000098\",\n  \"tipoComprobante\": \"BOLETA\",\n  \"idCliente\": 1,\n  \"idUsuario\": 1,\n  \"metodoPago\": \"EFECTIVO\",\n  \"observacion\": \"Prueba duplicado\",\n  \"detalles\": [\n    { \"idProducto\": 1, \"cantidad\": 1, \"precioUnitario\": 300.00, \"descuento\": 0 },\n    { \"idProducto\": 1, \"cantidad\": 2, \"precioUnitario\": 300.00, \"descuento\": 0 }\n  ]\n}" }, "url": { "raw": "{{baseUrl}}/api/ventas", "host": ["{{baseUrl}}"], "path": ["api", "ventas"] } } },
+        { "name": "PATCH anular venta", "request": { "method": "PATCH", "header": [], "url": { "raw": "{{baseUrl}}/api/ventas/1/anular", "host": ["{{baseUrl}}"], "path": ["api", "ventas", "1", "anular"] }, "description": "Un comprobante no se borra: se anula. Queda con estado ANULADA." } },
+        { "name": "PUT -> 405 (no existe a proposito)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{baseUrl}}/api/ventas/1", "host": ["{{baseUrl}}"], "path": ["api", "ventas", "1"] }, "description": "EVIDENCIA DE CRITERIO: una venta emitida no se edita. 405 Method Not Allowed." } },
+        { "name": "DELETE -> 405 (no existe a proposito)", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/ventas/1", "host": ["{{baseUrl}}"], "path": ["api", "ventas", "1"] } } }
+      ]
+    },
+    {
+      "name": "08 - Orden de servicio",
+      "item": [
+        { "name": "GET todas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/ordenes-servicio", "host": ["{{baseUrl}}"], "path": ["api", "ordenes-servicio"] } } },
+        { "name": "GET por cliente", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/ordenes-servicio/cliente/1", "host": ["{{baseUrl}}"], "path": ["api", "ordenes-servicio", "cliente", "1"] } } },
+        { "name": "GET por tecnico", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/ordenes-servicio/tecnico/1", "host": ["{{baseUrl}}"], "path": ["api", "ordenes-servicio", "tecnico", "1"] } } },
+        { "name": "POST crear", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"numeroOrden\": \"OS-2026-0045\",\n  \"idCliente\": 1,\n  \"idUsuario\": 1,\n  \"equipo\": \"Congeladora vertical\",\n  \"marca\": \"Coldex\",\n  \"modelo\": \"CV-350\",\n  \"numeroSerie\": \"SN998877\",\n  \"descripcionFalla\": \"No enfria y hace ruido en el compresor\",\n  \"fechaEntregaEstimada\": \"2026-10-05\",\n  \"costoEstimado\": 250.00\n}" }, "url": { "raw": "{{baseUrl}}/api/ordenes-servicio", "host": ["{{baseUrl}}"], "path": ["api", "ordenes-servicio"] } } },
+        { "name": "PATCH cambiar estado", "request": { "method": "PATCH", "header": [], "url": { "raw": "{{baseUrl}}/api/ordenes-servicio/1/estado/2", "host": ["{{baseUrl}}"], "path": ["api", "ordenes-servicio", "1", "estado", "2"] }, "description": "El estado se mueve por su propio endpoint, no editando el registro completo." } },
+        { "name": "REGLA: cerrar sin diagnostico -> 400", "request": { "method": "PATCH", "header": [], "url": { "raw": "{{baseUrl}}/api/ordenes-servicio/1/estado/5", "host": ["{{baseUrl}}"], "path": ["api", "ordenes-servicio", "1", "estado", "5"] }, "description": "Una orden no se cierra sin diagnostico ni trabajo realizado. Lo bloquea un trigger." } },
+        { "name": "DELETE (se cancela, no se borra)", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/ordenes-servicio/1", "host": ["{{baseUrl}}"], "path": ["api", "ordenes-servicio", "1"] }, "description": "No tiene columna activo: el DELETE pasa la orden a estado Cancelado." } }
+      ]
+    },
+    {
+      "name": "09 - Estado de orden",
+      "item": [
+        { "name": "GET todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/estados-orden", "host": ["{{baseUrl}}"], "path": ["api", "estados-orden"] } } },
+        { "name": "GET flujo ordenado", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/estados-orden/flujo", "host": ["{{baseUrl}}"], "path": ["api", "estados-orden", "flujo"] } } }
+      ]
+    },
+    {
+      "name": "10 - Movimientos de inventario (solo lectura)",
+      "item": [
+        { "name": "GET todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/movimientos-inventario", "host": ["{{baseUrl}}"], "path": ["api", "movimientos-inventario"] } } },
+        { "name": "GET por producto", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/movimientos-inventario/producto/1", "host": ["{{baseUrl}}"], "path": ["api", "movimientos-inventario", "producto", "1"] } } },
+        { "name": "GET por venta", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/movimientos-inventario/venta/1", "host": ["{{baseUrl}}"], "path": ["api", "movimientos-inventario", "venta", "1"] } } },
+        { "name": "POST -> 405 (la bitacora no se escribe a mano)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{baseUrl}}/api/movimientos-inventario", "host": ["{{baseUrl}}"], "path": ["api", "movimientos-inventario"] }, "description": "EVIDENCIA DE CRITERIO: una bitacora que se puede editar deja de ser evidencia. Solo GET." } },
+        { "name": "DELETE -> 405", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/api/movimientos-inventario/1", "host": ["{{baseUrl}}"], "path": ["api", "movimientos-inventario", "1"] } } }
+      ]
+    },
+    {
+      "name": "11 - Manejo de errores",
+      "item": [
+        { "name": "404 recurso inexistente", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/productos/99999", "host": ["{{baseUrl}}"], "path": ["api", "productos", "99999"] } } },
+        { "name": "400 id con letras", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/productos/abc", "host": ["{{baseUrl}}"], "path": ["api", "productos", "abc"] } } },
+        { "name": "409 nombre duplicado", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Administrador\",\n  \"descripcion\": \"Rol repetido a proposito\"\n}" }, "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] }, "description": "Choca con la restriccion UNIQUE de la base y el @RestControllerAdvice lo traduce a 409." } }
+      ]
+    }
+  ]
+}

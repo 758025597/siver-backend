@@ -2,6 +2,7 @@ package com.refricentro.siver.exception;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,23 @@ public class ManejadorGlobalErrores {
         String detalle = ex.getMostSpecificCause().getMessage();
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErrorRespuesta.de(409, "Conflicto con la base de datos", detalle));
+    }
+
+    /**
+     * 400 - cualquier otro rechazo de la base que no sea de integridad.
+     *
+     * El caso tipico: mandar un valor que no esta en un ENUM de MySQL.
+     * Este lanza "Data truncated for column", que NO es una
+     * DataIntegrityViolationException y antes se iba al 500 generico.
+     *
+     * Va despues del handler de integridad a proposito: Spring elige
+     * siempre el handler mas especifico que calce.
+     */
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorRespuesta> baseDeDatos(DataAccessException ex) {
+        String detalle = ex.getMostSpecificCause().getMessage();
+        return ResponseEntity.badRequest()
+                .body(ErrorRespuesta.de(400, "Dato rechazado por la base de datos", detalle));
     }
 
     /** 500 - cualquier otra cosa no prevista. */

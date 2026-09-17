@@ -1,39 +1,63 @@
 package com.refricentro.siver.controller;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import com.refricentro.siver.dto.EstadoOrdenRequest;
+import com.refricentro.siver.dto.EstadoOrdenResponse;
+import com.refricentro.siver.modelos.EstadoOrden;
+import com.refricentro.siver.service.EstadoOrdenService;
+import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Endpoints del catalogo de estados.
+ *
+ * Hereda los 5 del CRUD de ControladorGenerico. Es la UNICA entidad del
+ * proyecto cuyo DELETE es FISICO: la fila desaparece de la tabla.
+ * Aun asi, MySQL lo impide si alguna orden esta usando ese estado, porque
+ * la llave foranea es ON DELETE RESTRICT: en ese caso responde 409.
+ */
 @RestController
 @RequestMapping("/api/estados-orden")
-@RequiredArgsConstructor
-public class EstadoOrdenController {
+public class EstadoOrdenController
+        extends ControladorGenerico<EstadoOrden, Integer, EstadoOrdenRequest, EstadoOrdenResponse> {
+
     private final EstadoOrdenService estadoOrdenService;
 
-    @GetMapping
-    public ResponseEntity<List<EstadoOrden>> listar() {
-        return ResponseEntity.ok(estadoOrdenService.listar());
+    public EstadoOrdenController(EstadoOrdenService estadoOrdenService) {
+        super(estadoOrdenService);
+        this.estadoOrdenService = estadoOrdenService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<EstadoOrden> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(estadoOrdenService.buscarPorId(id));
+    @Override
+    protected EstadoOrden aEntidad(EstadoOrdenRequest request) {
+        EstadoOrden estado = new EstadoOrden();
+        estado.setNombre(request.nombre());
+        estado.setDescripcion(request.descripcion());
+        estado.setOrdenFlujo(request.ordenFlujo());
+        estado.setEsFinal(request.esFinal());
+        return estado;
     }
 
-    @PostMapping
-    public ResponseEntity<EstadoOrden> crear(@RequestBody EstadoOrden estadoOrden) {
-        EstadoOrden nuevo = estadoOrdenService.crear(estadoOrden);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+    @Override
+    protected EstadoOrdenResponse aRespuesta(EstadoOrden estado) {
+        return new EstadoOrdenResponse(
+                estado.getIdEstado(),
+                estado.getNombre(),
+                estado.getDescripcion(),
+                estado.getOrdenFlujo(),
+                estado.getEsFinal());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<EstadoOrden> actualizar(@PathVariable Integer id,
-                                                  @RequestBody EstadoOrden estadoOrden) {
-        return ResponseEntity.ok(estadoOrdenService.actualizar(id, estadoOrden));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        estadoOrdenService.eliminar(id);
-        return ResponseEntity.noContent().build();
+    /**
+     * GET /api/estados-orden/flujo - los estados en el orden de atencion.
+     * Sirve para dibujar la linea de tiempo de una orden en el frontend.
+     */
+    @GetMapping("/flujo")
+    public ResponseEntity<List<EstadoOrdenResponse>> listarEnOrdenDeFlujo() {
+        return ResponseEntity.ok(estadoOrdenService.listarEnOrdenDeFlujo().stream()
+                .map(this::aRespuesta)
+                .toList());
     }
 }

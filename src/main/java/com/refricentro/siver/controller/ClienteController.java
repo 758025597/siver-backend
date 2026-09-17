@@ -5,6 +5,9 @@ import com.refricentro.siver.dto.ClienteResponse;
 import com.refricentro.siver.modelos.Cliente;
 import com.refricentro.siver.service.ClienteService;
 import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -12,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClienteController
         extends ControladorGenerico<Cliente, Integer, ClienteRequest, ClienteResponse> {
 
+    private final ClienteService servicio;
+
     public ClienteController(ClienteService servicio) {
         super(servicio);
+        this.servicio = servicio;
     }
 
     @Override
@@ -43,5 +49,13 @@ public class ClienteController
                 cliente.getActivo(),
                 cliente.getFechaRegistro()
         );
+    }
+
+    /** GET /api/clientes/activos - solo los vigentes, para los combos del frontend. */
+    @GetMapping("/activos")
+    public ResponseEntity<List<ClienteResponse>> listarActivos() {
+        return ResponseEntity.ok(servicio.listarActivos().stream()
+                .map(this::aRespuesta)
+                .toList());
     }
 }

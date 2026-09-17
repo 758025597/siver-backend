@@ -5,6 +5,9 @@ import com.refricentro.siver.dto.ProveedorResponse;
 import com.refricentro.siver.modelos.Proveedor;
 import com.refricentro.siver.service.ProveedorService;
 import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -12,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProveedorController
         extends ControladorGenerico<Proveedor, Integer, ProveedorRequest, ProveedorResponse> {
 
+    private final ProveedorService servicio;
+
     public ProveedorController(ProveedorService servicio) {
         super(servicio);
+        this.servicio = servicio;
     }
 
     @Override
@@ -43,5 +49,13 @@ public class ProveedorController
                 proveedor.getActivo(),
                 proveedor.getFechaRegistro()
         );
+    }
+
+    /** GET /api/proveedores/activos - solo los vigentes, para los combos del frontend. */
+    @GetMapping("/activos")
+    public ResponseEntity<List<ProveedorResponse>> listarActivos() {
+        return ResponseEntity.ok(servicio.listarActivos().stream()
+                .map(this::aRespuesta)
+                .toList());
     }
 }

@@ -5,6 +5,9 @@ import com.refricentro.siver.dto.CategoriaResponse;
 import com.refricentro.siver.modelos.Categoria;
 import com.refricentro.siver.service.CategoriaService;
 import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -12,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class CategoriaController
         extends ControladorGenerico<Categoria, Integer, CategoriaRequest, CategoriaResponse> {
 
+    private final CategoriaService servicio;
+
     public CategoriaController(CategoriaService servicio) {
         super(servicio);
+        this.servicio = servicio;
     }
 
     @Override
@@ -33,5 +39,13 @@ public class CategoriaController
                 categoria.getActivo(),
                 categoria.getFechaRegistro()
         );
+    }
+
+    /** GET /api/categorias/activos - solo los vigentes, para los combos del frontend. */
+    @GetMapping("/activos")
+    public ResponseEntity<List<CategoriaResponse>> listarActivos() {
+        return ResponseEntity.ok(servicio.listarActivos().stream()
+                .map(this::aRespuesta)
+                .toList());
     }
 }

@@ -25,7 +25,7 @@ public class Rol implements Activable {
     @Column(nullable = false, length = 50, unique = true)
     private String nombre;
 
-    @Column(length = 100)
+    @Column(length = 200)
     private String descripcion;
 
     @Column(nullable = false)

@@ -34,8 +34,20 @@ public class ProductoServiceImpl
         destino.setUnidadMedida(origen.getUnidadMedida());
         destino.setPrecioCompra(origen.getPrecioCompra());
         destino.setPrecioVenta(origen.getPrecioVenta());
-        destino.setStock(origen.getStock());
         destino.setStockMinimo(origen.getStockMinimo());
+
+        // OJO: el stock NO se copia a proposito.
+        //
+        // Lo mantienen los triggers de MySQL: trg_detalle_venta_after_insert
+        // hace UPDATE producto SET stock = stock - cantidad en cada venta.
+        //
+        // Si se copiara, editar el nombre de un producto desde el frontend
+        // reescribiria el stock con el valor que el usuario tenia en pantalla
+        // y borraria las ventas descontadas mientras tanto. Es una perdida de
+        // datos silenciosa: la respuesta seria 200 y nadie se enteraria.
+        //
+        // El stock inicial si se define al CREAR. Para ajustarlo despues esta
+        // movimiento_inventario, que ademas deja registro de quien y por que.
     }
 
     @Override

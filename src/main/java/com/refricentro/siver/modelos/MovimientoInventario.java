@@ -24,14 +24,19 @@ public class MovimientoInventario {
     @Column(name = "id_movimiento")
     private Integer idMovimiento;
 
-    @Column(name = "id_producto", nullable = false)
-    private Integer idProducto;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_producto", nullable = false)
+    private Producto producto;
 
-    @Column(name = "id_usuario")
-    private Integer idUsuario;
+    /** Puede ser null: la columna admite NULL (ON DELETE SET NULL). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
 
-    @Column(name = "id_venta")
-    private Integer idVenta;
+    /** Null cuando el movimiento no vino de una venta (un ajuste, por ejemplo). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_venta")
+    private Venta venta;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_movimiento", nullable = false,

@@ -53,8 +53,8 @@ public class OrdenServicioServiceImpl extends ServicioGenerico<OrdenServicio, In
      */
     @Override
     protected void copiarDatos(OrdenServicio origen, OrdenServicio destino) {
-        destino.setIdCliente(origen.getIdCliente());
-        destino.setIdUsuario(origen.getIdUsuario());
+        destino.setCliente(origen.getCliente());
+        destino.setTecnico(origen.getTecnico());
         destino.setEquipo(origen.getEquipo());
         destino.setMarca(origen.getMarca());
         destino.setModelo(origen.getModelo());
@@ -79,7 +79,7 @@ public class OrdenServicioServiceImpl extends ServicioGenerico<OrdenServicio, In
     @Transactional
     public void eliminar(Integer id) {
         OrdenServicio orden = buscarPorId(id);
-        orden.setIdEstado(estadoCancelado().getIdEstado());
+        orden.setEstado(estadoCancelado());
         ordenServicioRepository.save(orden);
     }
 
@@ -89,26 +89,26 @@ public class OrdenServicioServiceImpl extends ServicioGenerico<OrdenServicio, In
         OrdenServicio orden = buscarPorId(idOrden);
         EstadoOrden estado = estadoOrdenRepository.findById(idEstado)
                 .orElseThrow(() -> new RecursoNoEncontradoException("EstadoOrden", idEstado));
-        orden.setIdEstado(estado.getIdEstado());
+        orden.setEstado(estado);
         return ordenServicioRepository.save(orden);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<OrdenServicio> listarPorCliente(Integer idCliente) {
-        return ordenServicioRepository.findByIdCliente(idCliente);
+        return ordenServicioRepository.findByCliente_IdCliente(idCliente);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<OrdenServicio> listarPorTecnico(Integer idUsuario) {
-        return ordenServicioRepository.findByIdUsuario(idUsuario);
+        return ordenServicioRepository.findByTecnico_IdUsuario(idUsuario);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<OrdenServicio> listarPorEstado(Integer idEstado) {
-        return ordenServicioRepository.findByIdEstado(idEstado);
+        return ordenServicioRepository.findByEstado_IdEstado(idEstado);
     }
 
     private EstadoOrden estadoCancelado() {

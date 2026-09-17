@@ -11,6 +11,8 @@ public record OrdenServicioResponse(
         Integer idCliente,
         Integer idUsuario,
         Integer idEstado,
+        /** Nombre del estado: se puede mostrar sin otra consulta. */
+        String nombreEstado,
         String equipo,
         String marca,
         String modelo,

@@ -29,11 +29,14 @@ public class DetalleVenta {
     @Column(name = "id_detalle")
     private Integer idDetalle;
 
-    @Column(name = "id_venta", nullable = false)
-    private Integer idVenta;
+    /** Cabecera a la que pertenece esta linea. */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_venta", nullable = false)
+    private Venta venta;
 
-    @Column(name = "id_producto", nullable = false)
-    private Integer idProducto;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_producto", nullable = false)
+    private Producto producto;
 
     @Column(name = "cantidad", nullable = false)
     private Integer cantidad;

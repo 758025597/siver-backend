@@ -2,6 +2,8 @@ package com.refricentro.siver.repository;
 
 import com.refricentro.siver.modelos.DetalleVenta;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +16,22 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Integer> {
 
-    List<DetalleVenta> findByIdVenta(Integer idVenta);
+    @EntityGraph(attributePaths = {"producto"})
+    List<DetalleVenta> findByVenta_IdVenta(Integer idVenta);
 
-    List<DetalleVenta> findByIdProducto(Integer idProducto);
+    List<DetalleVenta> findByProducto_IdProducto(Integer idProducto);
+
+    /**
+     * Trae DetalleVenta junto con sus relaciones en un solo SELECT con JOIN.
+     *
+     * Sin esto, al armar la respuesta fuera de la transaccion Hibernate
+     * lanzaria LazyInitializationException, porque las relaciones son LAZY.
+     */
+    @Override
+    @EntityGraph(attributePaths = {"producto", "venta"})
+    List<DetalleVenta> findAll();
+
+    @Override
+    @EntityGraph(attributePaths = {"producto", "venta"})
+    Optional<DetalleVenta> findById(Integer id);
 }

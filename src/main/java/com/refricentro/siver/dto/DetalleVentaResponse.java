@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 public record DetalleVentaResponse(
         Integer id,
         Integer idProducto,
+        /** Nombre del producto: evita otra consulta desde el frontend. */
+        String nombreProducto,
         Integer cantidad,
         BigDecimal precioUnitario,
         BigDecimal descuento,

@@ -38,16 +38,16 @@ public class MovimientoInventarioServiceImpl implements MovimientoInventarioServ
 
     @Override
     public List<MovimientoInventario> listarPorProducto(Integer idProducto) {
-        return repositorio.findByIdProducto(idProducto);
+        return repositorio.findByProducto_IdProducto(idProducto);
     }
 
     @Override
     public List<MovimientoInventario> listarPorUsuario(Integer idUsuario) {
-        return repositorio.findByIdUsuario(idUsuario);
+        return repositorio.findByUsuario_IdUsuario(idUsuario);
     }
 
     @Override
     public List<MovimientoInventario> listarPorVenta(Integer idVenta) {
-        return repositorio.findByIdVenta(idVenta);
+        return repositorio.findByVenta_IdVenta(idVenta);
     }
 }

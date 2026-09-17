@@ -66,7 +66,7 @@ public class VentaServiceImpl implements VentaService {
         Venta guardada = ventaRepository.save(venta);
 
         for (DetalleVenta detalle : detalles) {
-            detalle.setIdVenta(guardada.getIdVenta());
+            detalle.setVenta(guardada);
             // El subtotal lo calcula el trigger: aqui se manda en cero.
             detalleVentaRepository.save(detalle);
         }
@@ -93,7 +93,7 @@ public class VentaServiceImpl implements VentaService {
     @Transactional(readOnly = true)
     public List<DetalleVenta> listarDetalles(Integer idVenta) {
         buscarPorId(idVenta); // valida que la venta exista, si no da 404
-        return detalleVentaRepository.findByIdVenta(idVenta);
+        return detalleVentaRepository.findByVenta_IdVenta(idVenta);
     }
 
     /**
@@ -115,13 +115,13 @@ public class VentaServiceImpl implements VentaService {
     @Override
     @Transactional(readOnly = true)
     public List<Venta> listarPorCliente(Integer idCliente) {
-        return ventaRepository.findByIdCliente(idCliente);
+        return ventaRepository.findByCliente_IdCliente(idCliente);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Venta> listarPorVendedor(Integer idUsuario) {
-        return ventaRepository.findByIdUsuario(idUsuario);
+        return ventaRepository.findByUsuario_IdUsuario(idUsuario);
     }
 
     @Override

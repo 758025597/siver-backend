@@ -53,14 +53,13 @@ public class OrdenServicioController
         OrdenServicio orden = new OrdenServicio();
 
         // Se validan de verdad: si no existen, responde 404 y no 409.
-        orden.setIdCliente(clienteService.buscarPorId(request.idCliente()).getIdCliente());
-        orden.setIdUsuario(usuarioService.buscarPorId(request.idUsuario()).getIdUsuario());
+        orden.setCliente(clienteService.buscarPorId(request.idCliente()));
+        orden.setTecnico(usuarioService.buscarPorId(request.idUsuario()));
 
         // Al crear, si no mandan estado se asume el primero del flujo.
-        Integer idEstado = request.idEstado() != null
-                ? estadoOrdenService.buscarPorId(request.idEstado()).getIdEstado()
-                : estadoOrdenService.listarEnOrdenDeFlujo().getFirst().getIdEstado();
-        orden.setIdEstado(idEstado);
+        orden.setEstado(request.idEstado() != null
+                ? estadoOrdenService.buscarPorId(request.idEstado())
+                : estadoOrdenService.listarEnOrdenDeFlujo().getFirst());
 
         orden.setNumeroOrden(request.numeroOrden());
         orden.setEquipo(request.equipo());
@@ -79,8 +78,12 @@ public class OrdenServicioController
     @Override
     protected OrdenServicioResponse aRespuesta(OrdenServicio o) {
         return new OrdenServicioResponse(
-                o.getIdOrden(), o.getNumeroOrden(), o.getIdCliente(), o.getIdUsuario(),
-                o.getIdEstado(), o.getEquipo(), o.getMarca(), o.getModelo(),
+                o.getIdOrden(), o.getNumeroOrden(),
+                o.getCliente() != null ? o.getCliente().getIdCliente() : null,
+                o.getTecnico() != null ? o.getTecnico().getIdUsuario() : null,
+                o.getEstado() != null ? o.getEstado().getIdEstado() : null,
+                o.getEstado() != null ? o.getEstado().getNombre() : null,
+                o.getEquipo(), o.getMarca(), o.getModelo(),
                 o.getNumeroSerie(), o.getDescripcionFalla(), o.getDiagnostico(),
                 o.getTrabajoRealizado(), o.getFechaIngreso(), o.getFechaEntregaEstimada(),
                 o.getFechaEntregaReal(), o.getCostoEstimado(), o.getCostoFinal());

@@ -75,6 +75,13 @@ public class UsuarioServiceImpl extends ServicioSoftDelete<Usuario, Integer>
     }
 
     @Override
+    @Transactional
+    public void registrarAcceso(Usuario usuario) {
+        // save() directo: NO se toca la clave, que ya viene cifrada.
+        usuarioRepository.save(usuario);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Usuario buscarPorCorreo(String correo) {
         return usuarioRepository.findByCorreoIgnoreCase(correo)

@@ -19,14 +19,18 @@ public class OrdenServicio {
     @Column(name = "numero_orden", nullable = false, length = 20)
     private String numeroOrden;
 
-    @Column(name = "id_cliente", nullable = false)
-    private Integer idCliente;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_cliente", nullable = false)
+    private Cliente cliente;
 
-    @Column(name = "id_usuario", nullable = false)
-    private Integer idUsuario;
+    /** Tecnico responsable de la atencion. */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario tecnico;
 
-    @Column(name = "id_estado", nullable = false)
-    private Integer idEstado;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_estado", nullable = false)
+    private EstadoOrden estado;
 
     @Column(name = "equipo", nullable = false, length = 100)
     private String equipo;
@@ -89,28 +93,28 @@ public class OrdenServicio {
         this.numeroOrden = numeroOrden;
     }
 
-    public Integer getIdCliente() {
-        return idCliente;
+    public Cliente getCliente() {
+        return cliente;
     }
 
-    public void setIdCliente(Integer idCliente) {
-        this.idCliente = idCliente;
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
+    public Usuario getTecnico() {
+        return tecnico;
     }
 
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setTecnico(Usuario tecnico) {
+        this.tecnico = tecnico;
     }
 
-    public Integer getIdEstado() {
-        return idEstado;
+    public EstadoOrden getEstado() {
+        return estado;
     }
 
-    public void setIdEstado(Integer idEstado) {
-        this.idEstado = idEstado;
+    public void setEstado(EstadoOrden estado) {
+        this.estado = estado;
     }
 
     public String getEquipo() {

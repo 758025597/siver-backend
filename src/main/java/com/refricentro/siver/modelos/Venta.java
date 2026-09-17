@@ -1,6 +1,8 @@
 package com.refricentro.siver.modelos;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.Generated;
@@ -31,11 +33,14 @@ public class Venta {
             columnDefinition = "ENUM('BOLETA','FACTURA','NOTA_VENTA')")
     private TipoComprobante tipoComprobante = TipoComprobante.BOLETA;
 
-    @Column(name = "id_cliente", nullable = false)
-    private Integer idCliente;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_cliente", nullable = false)
+    private Cliente cliente;
 
-    @Column(name = "id_usuario", nullable = false)
-    private Integer idUsuario;
+    /** Vendedor que emitio el comprobante. */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
 
     @Generated(event = EventType.INSERT)
     @Column(name = "fecha_venta", nullable = false)
@@ -62,6 +67,22 @@ public class Venta {
 
     @Column(name = "observacion", length = 300)
     private String observacion;
+
+    /**
+     * Las lineas de la venta.
+     *
+     * mappedBy = "venta" significa que la llave foranea la manda DetalleVenta:
+     * aqui no se crea ninguna columna, solo se navega la relacion al reves.
+     * cascade = ALL hace que al guardar la venta se guarden sus lineas.
+     */
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetalleVenta> detalles = new ArrayList<>();
+
+    /** Agrega una linea manteniendo los dos lados de la relacion sincronizados. */
+    public void agregarDetalle(DetalleVenta detalle) {
+        detalles.add(detalle);
+        detalle.setVenta(this);
+    }
 
 
     public Venta() {
@@ -92,20 +113,28 @@ public class Venta {
         this.tipoComprobante = tipoComprobante;
     }
 
-    public Integer getIdCliente() {
-        return idCliente;
+    public Cliente getCliente() {
+        return cliente;
     }
 
-    public void setIdCliente(Integer idCliente) {
-        this.idCliente = idCliente;
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public List<DetalleVenta> getDetalles() {
+        return detalles;
+    }
+
+    public void setDetalles(List<DetalleVenta> detalles) {
+        this.detalles = detalles;
     }
 
     public LocalDateTime getFechaVenta() {

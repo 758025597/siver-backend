@@ -7,6 +7,7 @@ import com.refricentro.siver.dto.VentaResponse;
 import com.refricentro.siver.modelos.DetalleVenta;
 import com.refricentro.siver.modelos.Venta;
 import com.refricentro.siver.service.ClienteService;
+import com.refricentro.siver.service.ProductoService;
 import com.refricentro.siver.service.UsuarioService;
 import com.refricentro.siver.service.VentaService;
 import jakarta.validation.Valid;
@@ -42,13 +43,16 @@ public class VentaController {
     private final VentaService ventaService;
     private final ClienteService clienteService;
     private final UsuarioService usuarioService;
+    private final ProductoService productoService;
 
     public VentaController(VentaService ventaService,
                            ClienteService clienteService,
-                           UsuarioService usuarioService) {
+                           UsuarioService usuarioService,
+                           ProductoService productoService) {
         this.ventaService = ventaService;
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
+        this.productoService = productoService;
     }
 
     /** GET /api/ventas */
@@ -82,8 +86,8 @@ public class VentaController {
         venta.setObservacion(request.observacion());
 
         // Se validan de verdad: si no existen, responde 404 y no 409.
-        venta.setIdCliente(clienteService.buscarPorId(request.idCliente()).getIdCliente());
-        venta.setIdUsuario(usuarioService.buscarPorId(request.idUsuario()).getIdUsuario());
+        venta.setCliente(clienteService.buscarPorId(request.idCliente()));
+        venta.setUsuario(usuarioService.buscarPorId(request.idUsuario()));
 
         List<DetalleVenta> detalles = request.detalles().stream()
                 .map(this::aDetalle)
@@ -122,7 +126,7 @@ public class VentaController {
 
     private DetalleVenta aDetalle(DetalleVentaRequest r) {
         DetalleVenta d = new DetalleVenta();
-        d.setIdProducto(r.idProducto());
+        d.setProducto(productoService.buscarPorId(r.idProducto()));
         d.setCantidad(r.cantidad());
         d.setPrecioUnitario(r.precioUnitario());
         d.setDescuento(r.descuentoOCero());
@@ -133,13 +137,19 @@ public class VentaController {
     private VentaResponse aRespuesta(Venta v) {
         List<DetalleVentaResponse> lineas = ventaService.listarDetalles(v.getIdVenta()).stream()
                 .map(d -> new DetalleVentaResponse(
-                        d.getIdDetalle(), d.getIdProducto(), d.getCantidad(),
+                        d.getIdDetalle(),
+                        d.getProducto() != null ? d.getProducto().getIdProducto() : null,
+                        d.getProducto() != null ? d.getProducto().getNombre() : null,
+                        d.getCantidad(),
                         d.getPrecioUnitario(), d.getDescuento(), d.getSubtotal()))
                 .toList();
 
         return new VentaResponse(
                 v.getIdVenta(), v.getNumeroComprobante(), v.getTipoComprobante(),
-                v.getIdCliente(), v.getIdUsuario(), v.getFechaVenta(), v.getMetodoPago(),
+                v.getCliente() != null ? v.getCliente().getIdCliente() : null,
+                v.getCliente() != null ? v.getCliente().getNombres() : null,
+                v.getUsuario() != null ? v.getUsuario().getIdUsuario() : null,
+                v.getFechaVenta(), v.getMetodoPago(),
                 v.getSubtotal(), v.getIgv(), v.getTotal(), v.getEstado(),
                 v.getObservacion(), lineas);
     }

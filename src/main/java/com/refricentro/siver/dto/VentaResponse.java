@@ -16,6 +16,8 @@ public record VentaResponse(
         String numeroComprobante,
         Venta.TipoComprobante tipoComprobante,
         Integer idCliente,
+        /** Nombre del cliente, gracias a la relacion @ManyToOne. */
+        String nombreCliente,
         Integer idUsuario,
         LocalDateTime fechaVenta,
         Venta.MetodoPago metodoPago,

@@ -39,9 +39,9 @@ public class MovimientoInventarioController {
     private MovimientoInventarioResponse aRespuesta(MovimientoInventario m) {
         return new MovimientoInventarioResponse(
                 m.getIdMovimiento(),
-                m.getIdProducto(),
-                m.getIdUsuario(),
-                m.getIdVenta(),
+                m.getProducto() != null ? m.getProducto().getIdProducto() : null,
+                m.getUsuario() != null ? m.getUsuario().getIdUsuario() : null,
+                m.getVenta() != null ? m.getVenta().getIdVenta() : null,
                 m.getTipoMovimiento(),
                 m.getCantidad(),
                 m.getStockAnterior(),

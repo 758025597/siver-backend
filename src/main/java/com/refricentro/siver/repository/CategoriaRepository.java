@@ -1,6 +1,6 @@
 package com.refricentro.siver.repository;
 
-import com.refricentro.siver.modelos.Categoria;
+import com.refricentro.siver.model.Categoria;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,8 +1,8 @@
 package com.refricentro.siver.service.impl;
 
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
-import com.refricentro.siver.modelos.DetalleVenta;
-import com.refricentro.siver.modelos.Venta;
+import com.refricentro.siver.model.DetalleVenta;
+import com.refricentro.siver.model.Venta;
 import com.refricentro.siver.repository.DetalleVentaRepository;
 import com.refricentro.siver.repository.VentaRepository;
 import com.refricentro.siver.service.VentaService;

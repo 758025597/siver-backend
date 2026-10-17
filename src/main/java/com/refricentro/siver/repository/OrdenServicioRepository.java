@@ -1,6 +1,6 @@
 package com.refricentro.siver.repository;
 
-import com.refricentro.siver.modelos.OrdenServicio;
+import com.refricentro.siver.model.OrdenServicio;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;

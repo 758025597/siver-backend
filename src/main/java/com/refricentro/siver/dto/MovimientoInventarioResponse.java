@@ -1,6 +1,6 @@
 package com.refricentro.siver.dto;
 
-import com.refricentro.siver.modelos.enums.TipoMovimiento;
+import com.refricentro.siver.model.enums.TipoMovimiento;
 import java.time.LocalDateTime;
 
 public record MovimientoInventarioResponse(

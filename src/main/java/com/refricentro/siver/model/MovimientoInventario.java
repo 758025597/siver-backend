@@ -1,6 +1,6 @@
-package com.refricentro.siver.modelos;
+package com.refricentro.siver.model;
 
-import com.refricentro.siver.modelos.enums.TipoMovimiento;
+import com.refricentro.siver.model.enums.TipoMovimiento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.MovimientoInventarioResponse;
-import com.refricentro.siver.modelos.MovimientoInventario;
+import com.refricentro.siver.model.MovimientoInventario;
 import com.refricentro.siver.service.MovimientoInventarioService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;

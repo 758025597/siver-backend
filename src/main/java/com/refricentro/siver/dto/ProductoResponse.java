@@ -1,6 +1,6 @@
 package com.refricentro.siver.dto;
 
-import com.refricentro.siver.modelos.enums.UnidadMedida;
+import com.refricentro.siver.model.enums.UnidadMedida;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

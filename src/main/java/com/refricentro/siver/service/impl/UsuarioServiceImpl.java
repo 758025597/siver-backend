@@ -1,7 +1,7 @@
 package com.refricentro.siver.service.impl;
 
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
-import com.refricentro.siver.modelos.Usuario;
+import com.refricentro.siver.model.Usuario;
 import com.refricentro.siver.repository.UsuarioRepository;
 import com.refricentro.siver.service.UsuarioService;
 import java.util.List;

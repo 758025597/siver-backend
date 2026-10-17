@@ -1,7 +1,7 @@
 package com.refricentro.siver.service.impl;
 
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
-import com.refricentro.siver.modelos.MovimientoInventario;
+import com.refricentro.siver.model.MovimientoInventario;
 import com.refricentro.siver.repository.MovimientoInventarioRepository;
 import com.refricentro.siver.service.MovimientoInventarioService;
 import java.util.List;

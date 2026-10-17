@@ -2,7 +2,7 @@ package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.UsuarioRequest;
 import com.refricentro.siver.dto.UsuarioResponse;
-import com.refricentro.siver.modelos.Usuario;
+import com.refricentro.siver.model.Usuario;
 import com.refricentro.siver.service.RolService;
 import com.refricentro.siver.service.UsuarioService;
 import java.util.List;

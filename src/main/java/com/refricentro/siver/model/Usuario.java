@@ -1,4 +1,4 @@
-package com.refricentro.siver.modelos;
+package com.refricentro.siver.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

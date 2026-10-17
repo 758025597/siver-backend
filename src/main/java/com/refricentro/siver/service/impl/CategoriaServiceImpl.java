@@ -1,6 +1,6 @@
 package com.refricentro.siver.service.impl;
 
-import com.refricentro.siver.modelos.Categoria;
+import com.refricentro.siver.model.Categoria;
 import com.refricentro.siver.repository.CategoriaRepository;
 import com.refricentro.siver.service.CategoriaService;
 import org.springframework.stereotype.Service;

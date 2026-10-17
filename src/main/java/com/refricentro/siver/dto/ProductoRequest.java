@@ -1,7 +1,7 @@
 package com.refricentro.siver.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.refricentro.siver.modelos.enums.UnidadMedida;
+import com.refricentro.siver.model.enums.UnidadMedida;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

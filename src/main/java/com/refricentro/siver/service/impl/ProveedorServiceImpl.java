@@ -1,6 +1,6 @@
 package com.refricentro.siver.service.impl;
 
-import com.refricentro.siver.modelos.Proveedor;
+import com.refricentro.siver.model.Proveedor;
 import com.refricentro.siver.repository.ProveedorRepository;
 import com.refricentro.siver.service.ProveedorService;
 import org.springframework.stereotype.Service;

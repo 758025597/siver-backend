@@ -2,7 +2,7 @@ package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.LoginRequest;
 import com.refricentro.siver.dto.LoginResponse;
-import com.refricentro.siver.modelos.Usuario;
+import com.refricentro.siver.model.Usuario;
 import com.refricentro.siver.security.JwtUtil;
 import com.refricentro.siver.service.UsuarioService;
 import jakarta.validation.Valid;

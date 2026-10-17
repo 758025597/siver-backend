@@ -1,6 +1,6 @@
 package com.refricentro.siver.security;
 
-import com.refricentro.siver.modelos.Usuario;
+import com.refricentro.siver.model.Usuario;
 import com.refricentro.siver.repository.UsuarioRepository;
 import java.util.List;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

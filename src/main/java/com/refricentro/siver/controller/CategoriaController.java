@@ -2,7 +2,7 @@ package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.CategoriaRequest;
 import com.refricentro.siver.dto.CategoriaResponse;
-import com.refricentro.siver.modelos.Categoria;
+import com.refricentro.siver.model.Categoria;
 import com.refricentro.siver.service.CategoriaService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;

@@ -2,7 +2,7 @@ package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.EstadoOrdenRequest;
 import com.refricentro.siver.dto.EstadoOrdenResponse;
-import com.refricentro.siver.modelos.EstadoOrden;
+import com.refricentro.siver.model.EstadoOrden;
 import com.refricentro.siver.service.EstadoOrdenService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;

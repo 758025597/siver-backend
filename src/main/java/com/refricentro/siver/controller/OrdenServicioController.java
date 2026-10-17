@@ -2,7 +2,7 @@ package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.OrdenServicioRequest;
 import com.refricentro.siver.dto.OrdenServicioResponse;
-import com.refricentro.siver.modelos.OrdenServicio;
+import com.refricentro.siver.model.OrdenServicio;
 import com.refricentro.siver.service.ClienteService;
 import com.refricentro.siver.service.EstadoOrdenService;
 import com.refricentro.siver.service.OrdenServicioService;

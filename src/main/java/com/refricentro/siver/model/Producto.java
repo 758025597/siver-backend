@@ -1,4 +1,4 @@
-package com.refricentro.siver.modelos;
+package com.refricentro.siver.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,7 +25,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
-import com.refricentro.siver.modelos.enums.UnidadMedida;
+import com.refricentro.siver.model.enums.UnidadMedida;
 
 /** Mapeo de la tabla producto. */
 @Entity

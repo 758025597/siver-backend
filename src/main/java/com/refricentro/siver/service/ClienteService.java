@@ -1,6 +1,6 @@
 package com.refricentro.siver.service;
 
-import com.refricentro.siver.modelos.Cliente;
+import com.refricentro.siver.model.Cliente;
 
 import java.util.List;
 

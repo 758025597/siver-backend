@@ -1,6 +1,6 @@
 package com.refricentro.siver.dto;
 
-import com.refricentro.siver.modelos.Venta;
+import com.refricentro.siver.model.Venta;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;

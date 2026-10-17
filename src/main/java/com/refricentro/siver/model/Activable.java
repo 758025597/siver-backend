@@ -1,4 +1,4 @@
-package com.refricentro.siver.modelos;
+package com.refricentro.siver.model;
 
 /**
  * La implementan las entidades que tienen columna `activo` en la base

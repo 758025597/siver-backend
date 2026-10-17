@@ -1,6 +1,6 @@
 package com.refricentro.siver.repository;
 
-import com.refricentro.siver.modelos.EstadoOrden;
+import com.refricentro.siver.model.EstadoOrden;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

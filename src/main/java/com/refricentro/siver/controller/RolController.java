@@ -2,7 +2,7 @@ package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.RolRequest;
 import com.refricentro.siver.dto.RolResponse;
-import com.refricentro.siver.modelos.Rol;
+import com.refricentro.siver.model.Rol;
 import com.refricentro.siver.service.RolService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;

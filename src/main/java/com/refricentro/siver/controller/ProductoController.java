@@ -2,7 +2,7 @@ package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.ProductoRequest;
 import com.refricentro.siver.dto.ProductoResponse;
-import com.refricentro.siver.modelos.Producto;
+import com.refricentro.siver.model.Producto;
 import com.refricentro.siver.service.CategoriaService;
 import com.refricentro.siver.service.ProductoService;
 import com.refricentro.siver.service.ProveedorService;

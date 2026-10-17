@@ -1,6 +1,6 @@
 package com.refricentro.siver.repository;
 
-import com.refricentro.siver.modelos.Venta;
+import com.refricentro.siver.model.Venta;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

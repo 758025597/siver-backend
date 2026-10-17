@@ -1,4 +1,4 @@
-package com.refricentro.siver.modelos;
+package com.refricentro.siver.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,24 +8,23 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
-
 @Data
 @Entity
-@Table(name = "rol")
+@Table(name = "categoria")
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Rol implements Activable {
+public class Categoria implements Activable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    @Column(name = "id_rol")
-    private Integer idRol;
+    @Column(name = "id_categoria")
+    private Integer idCat;
 
-    @Column(nullable = false, length = 50, unique = true)
+    @Column(nullable = false, length = 100, unique = true)
     private String nombre;
 
-    @Column(length = 200)
+    @Column(length = 255)  // Le pongo 255 porque es más común
     private String descripcion;
 
     @Column(nullable = false)
@@ -34,5 +33,4 @@ public class Rol implements Activable {
     @Generated(event = EventType.INSERT)
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;
-
 }

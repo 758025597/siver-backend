@@ -1,7 +1,7 @@
 package com.refricentro.siver.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.refricentro.siver.modelos.Venta;
+import com.refricentro.siver.model.Venta;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;

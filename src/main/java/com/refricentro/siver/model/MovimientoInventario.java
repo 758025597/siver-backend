@@ -3,9 +3,9 @@ package com.refricentro.siver.model;
 import com.refricentro.siver.model.enums.TipoMovimiento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import org.hibernate.annotations.Generated;
@@ -13,15 +13,16 @@ import org.hibernate.generator.EventType;
 
 @Entity
 @Table(name = "movimiento_inventario")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class MovimientoInventario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_movimiento")
+    @EqualsAndHashCode.Include
     private Integer idMovimiento;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

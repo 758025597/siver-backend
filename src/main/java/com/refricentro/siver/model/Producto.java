@@ -19,9 +19,10 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
@@ -30,15 +31,16 @@ import com.refricentro.siver.model.enums.UnidadMedida;
 /** Mapeo de la tabla producto. */
 @Entity
 @Table(name = "producto")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Producto implements Activable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_producto")
+    @EqualsAndHashCode.Include
     private Integer idProducto;
 
     @NotBlank

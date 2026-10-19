@@ -2,13 +2,23 @@ package com.refricentro.siver.model;
 
 import jakarta.persistence.*;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 @Entity
 @Table(name = "estado_orden")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class EstadoOrden {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_estado")
+    @EqualsAndHashCode.Include
     private Integer idEstado;
 
     @Column(name = "nombre", length = 50, nullable = false, unique = true)
@@ -22,55 +32,4 @@ public class EstadoOrden {
 
     @Column(name = "es_final", nullable = false)
     private Boolean esFinal = false;
-
-    public EstadoOrden() {
-    }
-
-    public EstadoOrden(Integer idEstado, String nombre, String descripcion, Byte ordenFlujo, Boolean esFinal) {
-        this.idEstado = idEstado;
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.ordenFlujo = ordenFlujo;
-        this.esFinal = esFinal;
-    }
-
-    public Integer getIdEstado() {
-        return idEstado;
-    }
-
-    public void setIdEstado(Integer idEstado) {
-        this.idEstado = idEstado;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public Byte getOrdenFlujo() {
-        return ordenFlujo;
-    }
-
-    public void setOrdenFlujo(Byte ordenFlujo) {
-        this.ordenFlujo = ordenFlujo;
-    }
-
-    public Boolean getEsFinal() {
-        return esFinal;
-    }
-
-    public void setEsFinal(Boolean esFinal) {
-        this.esFinal = esFinal;
-    }
 }

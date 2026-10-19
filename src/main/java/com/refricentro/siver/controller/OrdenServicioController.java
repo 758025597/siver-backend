@@ -8,6 +8,9 @@ import com.refricentro.siver.service.EstadoOrdenService;
 import com.refricentro.siver.service.OrdenServicioService;
 import com.refricentro.siver.service.UsuarioService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/ordenes-servicio")
+@RequiredArgsConstructor
 public class OrdenServicioController
         extends ControladorGenerico<OrdenServicio, Integer,
         OrdenServicioRequest, OrdenServicioResponse> {
@@ -37,60 +41,36 @@ public class OrdenServicioController
     private final UsuarioService usuarioService;
     private final EstadoOrdenService estadoOrdenService;
 
-    public OrdenServicioController(OrdenServicioService ordenServicioService,
-                                   ClienteService clienteService,
-                                   UsuarioService usuarioService,
-                                   EstadoOrdenService estadoOrdenService) {
-        super(ordenServicioService);
-        this.ordenServicioService = ordenServicioService;
-        this.clienteService = clienteService;
-        this.usuarioService = usuarioService;
-        this.estadoOrdenService = estadoOrdenService;
+    @Qualifier("ordenServicioMapper")
+    private final ModelMapper mapper;
+
+    @Override
+    protected OrdenServicioService getServicio() {
+        return ordenServicioService;
     }
 
     @Override
-    protected OrdenServicio aEntidad(OrdenServicioRequest request) {
-        OrdenServicio orden = new OrdenServicio();
+    protected ModelMapper getMapper() {
+        return mapper;
+    }
 
+    @Override
+    protected Integer obtenerId(OrdenServicio orden) {
+        return orden.getIdOrden();
+    }
+
+    /** ModelMapper copia los datos del equipo; cliente, tecnico y estado se buscan aparte. */
+    @Override
+    protected OrdenServicio aEntidad(OrdenServicioRequest request) {
+        OrdenServicio orden = super.aEntidad(request);
         // Se validan de verdad: si no existen, responde 404 y no 409.
         orden.setCliente(clienteService.buscarPorId(request.getIdCliente()));
         orden.setTecnico(usuarioService.buscarPorId(request.getIdUsuario()));
-
         // Al crear, si no mandan estado se asume el primero del flujo.
         orden.setEstado(request.getIdEstado() != null
                 ? estadoOrdenService.buscarPorId(request.getIdEstado())
                 : estadoOrdenService.listarEnOrdenDeFlujo().getFirst());
-
-        orden.setNumeroOrden(request.getNumeroOrden());
-        orden.setEquipo(request.getEquipo());
-        orden.setMarca(request.getMarca());
-        orden.setModelo(request.getModelo());
-        orden.setNumeroSerie(request.getNumeroSerie());
-        orden.setDescripcionFalla(request.getDescripcionFalla());
-        orden.setDiagnostico(request.getDiagnostico());
-        orden.setTrabajoRealizado(request.getTrabajoRealizado());
-        orden.setFechaEntregaEstimada(request.getFechaEntregaEstimada());
-        orden.setCostoEstimado(request.getCostoEstimado());
-        orden.setCostoFinal(request.getCostoFinal());
         return orden;
-    }
-
-    @Override
-    protected OrdenServicioResponse aRespuesta(OrdenServicio o) {
-        return new OrdenServicioResponse(
-                o.getIdOrden(), o.getNumeroOrden(),
-                o.getCliente() != null ? o.getCliente().getIdCliente() : null,
-                o.getTecnico() != null ? o.getTecnico().getIdUsuario() : null,
-                o.getEstado() != null ? o.getEstado().getIdEstado() : null,
-                o.getEstado() != null ? o.getEstado().getNombre() : null,
-                o.getEquipo(), o.getMarca(), o.getModelo(),
-                o.getNumeroSerie(), o.getDescripcionFalla(), o.getDiagnostico(),
-                o.getTrabajoRealizado(), o.getFechaIngreso(), o.getFechaEntregaEstimada(),
-                o.getFechaEntregaReal(), o.getCostoEstimado(), o.getCostoFinal());
-    }
-
-    private ResponseEntity<List<OrdenServicioResponse>> responder(List<OrdenServicio> ordenes) {
-        return ResponseEntity.ok(ordenes.stream().map(this::aRespuesta).toList());
     }
 
     /**
@@ -108,18 +88,18 @@ public class OrdenServicioController
     /** GET /api/ordenes-servicio/cliente/{idCliente} - historial de un cliente. */
     @GetMapping("/cliente/{idCliente}")
     public ResponseEntity<List<OrdenServicioResponse>> porCliente(@PathVariable Integer idCliente) {
-        return responder(ordenServicioService.listarPorCliente(idCliente));
+        return ResponseEntity.ok(aRespuestas(ordenServicioService.listarPorCliente(idCliente)));
     }
 
     /** GET /api/ordenes-servicio/tecnico/{idUsuario} - carga de trabajo de un tecnico. */
     @GetMapping("/tecnico/{idUsuario}")
     public ResponseEntity<List<OrdenServicioResponse>> porTecnico(@PathVariable Integer idUsuario) {
-        return responder(ordenServicioService.listarPorTecnico(idUsuario));
+        return ResponseEntity.ok(aRespuestas(ordenServicioService.listarPorTecnico(idUsuario)));
     }
 
     /** GET /api/ordenes-servicio/estado/{idEstado} - por ejemplo, las pendientes. */
     @GetMapping("/estado/{idEstado}")
     public ResponseEntity<List<OrdenServicioResponse>> porEstado(@PathVariable Integer idEstado) {
-        return responder(ordenServicioService.listarPorEstado(idEstado));
+        return ResponseEntity.ok(aRespuestas(ordenServicioService.listarPorEstado(idEstado)));
     }
 }

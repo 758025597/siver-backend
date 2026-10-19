@@ -7,6 +7,9 @@ import com.refricentro.siver.service.CategoriaService;
 import com.refricentro.siver.service.ProductoService;
 import com.refricentro.siver.service.ProveedorService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/productos")
+@RequiredArgsConstructor
 public class ProductoController
         extends ControladorGenerico<Producto, Integer, ProductoRequest, ProductoResponse> {
 
@@ -33,81 +37,54 @@ public class ProductoController
     private final CategoriaService categoriaService;
     private final ProveedorService proveedorService;
 
-    public ProductoController(ProductoService productoService,
-                              CategoriaService categoriaService,
-                              ProveedorService proveedorService) {
-        super(productoService);
-        this.productoService = productoService;
-        this.categoriaService = categoriaService;
-        this.proveedorService = proveedorService;
+    @Qualifier("productoMapper")
+    private final ModelMapper mapper;
+
+    @Override
+    protected ProductoService getServicio() {
+        return productoService;
     }
 
     @Override
+    protected ModelMapper getMapper() {
+        return mapper;
+    }
+
+    @Override
+    protected Integer obtenerId(Producto producto) {
+        return producto.getIdProducto();
+    }
+
+    /**
+     * ModelMapper copia los datos simples (codigo, precios, stock...).
+     * La categoria y el proveedor se buscan de verdad, no se arma un objeto
+     * vacio con el id: asi se valida que existan y el error sale como 404.
+     *
+     * El stock solo se usa al CREAR. En el update, copiarDatos() lo ignora
+     * a proposito para no pisar lo que hacen los triggers.
+     */
+    @Override
     protected Producto aEntidad(ProductoRequest request) {
-        Producto producto = new Producto();
-
-        producto.setCodigo(request.getCodigo());
-        producto.setNombre(request.getNombre());
-        producto.setDescripcion(request.getDescripcion());
-
-        // Se buscan de verdad, no se arma un objeto vacio con el id:
-        // asi se valida que existan y el error sale como 404, no como 409.
+        Producto producto = super.aEntidad(request);
         producto.setCategoria(categoriaService.buscarPorId(request.getIdCategoria()));
-
         if (request.getIdProveedor() != null) {
             producto.setProveedor(proveedorService.buscarPorId(request.getIdProveedor()));
         }
-
-        producto.setUnidadMedida(request.getUnidadMedida());
-        producto.setPrecioCompra(request.getPrecioCompra());
-        producto.setPrecioVenta(request.getPrecioVenta());
-        producto.setStockMinimo(request.getStockMinimo());
-
-        // El stock solo se usa al CREAR. En el update, copiarDatos() lo
-        // ignora a proposito para no pisar lo que hacen los triggers.
-        producto.setStock(request.getStock());
-
         return producto;
-    }
-
-    @Override
-    protected ProductoResponse aRespuesta(Producto producto) {
-        return new ProductoResponse(
-                producto.getIdProducto(),
-                producto.getCodigo(),
-                producto.getNombre(),
-                producto.getDescripcion(),
-                producto.getCategoria() != null ? producto.getCategoria().getIdCat() : null,
-                producto.getProveedor() != null ? producto.getProveedor().getIdProveedor() : null,
-                producto.getUnidadMedida(),
-                producto.getPrecioCompra(),
-                producto.getPrecioVenta(),
-                producto.getStock(),
-                producto.getStockMinimo(),
-                producto.getActivo(),
-                producto.getFechaRegistro()
-        );
     }
 
     /** GET /api/productos/activos - solo los vigentes. */
     @GetMapping("/activos")
     public ResponseEntity<List<ProductoResponse>> listarActivos() {
-        return ResponseEntity.ok(productoService.listarActivos().stream()
-                .map(this::aRespuesta)
-                .toList());
+        return ResponseEntity.ok(aRespuestas(productoService.listarActivos()));
     }
 
     /**
      * GET /api/productos/stock-bajo - los que llegaron al minimo.
-     *
-     * El servicio ya tenia este metodo pero nadie lo habia expuesto, asi que
-     * la URL caia en el GET /{id} heredado e intentaba convertir "stock-bajo"
-     * en un numero. Sirve para la alerta de reposicion del dashboard.
+     * Sirve para la alerta de reposicion del dashboard.
      */
     @GetMapping("/stock-bajo")
     public ResponseEntity<List<ProductoResponse>> listarConStockBajo() {
-        return ResponseEntity.ok(productoService.buscarConStockBajo().stream()
-                .map(this::aRespuesta)
-                .toList());
+        return ResponseEntity.ok(aRespuestas(productoService.buscarConStockBajo()));
     }
 }

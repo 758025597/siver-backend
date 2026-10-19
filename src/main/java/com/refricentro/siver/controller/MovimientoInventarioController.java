@@ -3,7 +3,11 @@ package com.refricentro.siver.controller;
 import com.refricentro.siver.dto.MovimientoInventarioResponse;
 import com.refricentro.siver.model.MovimientoInventario;
 import com.refricentro.siver.service.MovimientoInventarioService;
+import com.refricentro.siver.util.MapperUtil;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,32 +32,22 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/movimientos-inventario")
+@RequiredArgsConstructor
 public class MovimientoInventarioController {
 
     private final MovimientoInventarioService servicio;
 
-    public MovimientoInventarioController(MovimientoInventarioService servicio) {
-        this.servicio = servicio;
-    }
+    @Qualifier("movimientoMapper")
+    private final ModelMapper mapper;
 
     private MovimientoInventarioResponse aRespuesta(MovimientoInventario m) {
-        return new MovimientoInventarioResponse(
-                m.getIdMovimiento(),
-                m.getProducto() != null ? m.getProducto().getIdProducto() : null,
-                m.getUsuario() != null ? m.getUsuario().getIdUsuario() : null,
-                m.getVenta() != null ? m.getVenta().getIdVenta() : null,
-                m.getTipoMovimiento(),
-                m.getCantidad(),
-                m.getStockAnterior(),
-                m.getStockNuevo(),
-                m.getMotivo(),
-                m.getFechaMovimiento()
-        );
+        return mapper.map(m, MovimientoInventarioResponse.class);
     }
 
     private ResponseEntity<List<MovimientoInventarioResponse>> responder(
             List<MovimientoInventario> movimientos) {
-        return ResponseEntity.ok(movimientos.stream().map(this::aRespuesta).toList());
+        return ResponseEntity.ok(
+                MapperUtil.mapList(mapper, movimientos, MovimientoInventarioResponse.class));
     }
 
     /** GET /api/movimientos-inventario */

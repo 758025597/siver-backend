@@ -1,22 +1,25 @@
 package com.refricentro.siver.service.impl;
 
 import com.refricentro.siver.model.Producto;
+import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.repository.ProductoRepository;
 import com.refricentro.siver.service.ProductoService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProductoServiceImpl
         extends ServicioSoftDelete<Producto, Integer>
         implements ProductoService {
 
-    private final ProductoRepository productoRepository;
+    private final ProductoRepository repo;
 
-    public ProductoServiceImpl(ProductoRepository productoRepository) {
-        super(productoRepository);
-        this.productoRepository = productoRepository;
+    @Override
+    protected IGenericRepository<Producto, Integer> getRepo() {
+        return repo;
     }
 
     @Override
@@ -52,11 +55,11 @@ public class ProductoServiceImpl
 
     @Override
     public List<Producto> listarActivos() {
-        return productoRepository.findByActivoTrue();
+        return repo.findByActivoTrue();
     }
 
     @Override
     public List<Producto> buscarConStockBajo() {
-        return productoRepository.findConStockBajo();
+        return repo.findConStockBajo();
     }
 }

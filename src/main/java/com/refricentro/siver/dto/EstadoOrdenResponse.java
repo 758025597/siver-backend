@@ -1,10 +1,18 @@
 package com.refricentro.siver.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /** Lo que SALE por la API al consultar un estado. */
-public record EstadoOrdenResponse(
-        Integer id,
-        String nombre,
-        String descripcion,
-        Byte ordenFlujo,
-        Boolean esFinal) {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class EstadoOrdenResponse {
+
+    private Integer id;
+    private String nombre;
+    private String descripcion;
+    private Byte ordenFlujo;
+    private Boolean esFinal;
 }

@@ -55,14 +55,14 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.correo(), request.clave()));
+                    new UsernamePasswordAuthenticationToken(request.getCorreo(), request.getClave()));
         } catch (DisabledException e) {
             return ResponseEntity.status(401).body(error("La cuenta esta desactivada"));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body(error("Correo o clave incorrectos"));
         }
 
-        Usuario usuario = usuarioService.buscarPorCorreo(request.correo());
+        Usuario usuario = usuarioService.buscarPorCorreo(request.getCorreo());
         String rol = usuario.getRol() != null ? usuario.getRol().getNombre() : "SIN_ROL";
 
         // Deja constancia de cuando entro. Es para lo que existe la columna.

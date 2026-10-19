@@ -1,5 +1,6 @@
 package com.refricentro.siver.model;
 
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -59,12 +60,14 @@ public class Producto implements Activable {
 
     /** FK obligatoria hacia categoria. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_categoria", nullable = false)
+    @JoinColumn(name = "id_categoria", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_producto_categoria"))
     private Categoria categoria;
 
     /** FK opcional: id_proveedor admite NULL en la tabla. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_proveedor")
+    @JoinColumn(name = "id_proveedor",
+            foreignKey = @ForeignKey(name = "fk_producto_proveedor"))
     private Proveedor proveedor;
 
     /** ENUM de MySQL guardado como texto, no como numero. */

@@ -46,12 +46,14 @@ public class Venta {
     private TipoComprobante tipoComprobante = TipoComprobante.BOLETA;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_cliente", nullable = false)
+    @JoinColumn(name = "id_cliente", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_venta_cliente"))
     private Cliente cliente;
 
     /** Vendedor que emitio el comprobante. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_usuario", nullable = false)
+    @JoinColumn(name = "id_usuario", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_venta_usuario"))
     private Usuario usuario;
 
     @Generated(event = EventType.INSERT)

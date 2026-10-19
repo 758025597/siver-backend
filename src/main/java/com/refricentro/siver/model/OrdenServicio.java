@@ -32,16 +32,19 @@ public class OrdenServicio {
     private String numeroOrden;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_cliente", nullable = false)
+    @JoinColumn(name = "id_cliente", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_orden_cliente"))
     private Cliente cliente;
 
     /** Tecnico responsable de la atencion. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_usuario", nullable = false)
+    @JoinColumn(name = "id_usuario", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_orden_usuario"))
     private Usuario tecnico;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_estado", nullable = false)
+    @JoinColumn(name = "id_estado", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_orden_estado"))
     private EstadoOrden estado;
 
     @Column(name = "equipo", nullable = false, length = 100)

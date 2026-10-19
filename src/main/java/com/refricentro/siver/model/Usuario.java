@@ -1,5 +1,6 @@
 package com.refricentro.siver.model;
 
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -39,7 +40,8 @@ public class Usuario implements Activable {
 
     /** FK hacia rol. LAZY: el rol se consulta solo cuando se usa. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_rol", nullable = false)
+    @JoinColumn(name = "id_rol", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_usuario_rol"))
     private Rol rol;
 
     @NotBlank

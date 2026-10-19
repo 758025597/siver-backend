@@ -26,17 +26,20 @@ public class MovimientoInventario {
     private Integer idMovimiento;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_producto", nullable = false)
+    @JoinColumn(name = "id_producto", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_movimiento_producto"))
     private Producto producto;
 
     /** Puede ser null: la columna admite NULL (ON DELETE SET NULL). */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario",
+            foreignKey = @ForeignKey(name = "fk_movimiento_usuario"))
     private Usuario usuario;
 
     /** Null cuando el movimiento no vino de una venta (un ajuste, por ejemplo). */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_venta")
+    @JoinColumn(name = "id_venta",
+            foreignKey = @ForeignKey(name = "fk_movimiento_venta"))
     private Venta venta;
 
     @Enumerated(EnumType.STRING)

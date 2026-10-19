@@ -1,16 +1,15 @@
+
 package com.refricentro.siver.repository;
 
 import com.refricentro.siver.model.MovimientoInventario;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface MovimientoInventarioRepository
-        extends JpaRepository<MovimientoInventario, Integer> {
+        extends IGenericRepository<MovimientoInventario, Integer> {
 
     List<MovimientoInventario> findByProducto_IdProducto(Integer idProducto);
 
@@ -18,12 +17,6 @@ public interface MovimientoInventarioRepository
 
     List<MovimientoInventario> findByVenta_IdVenta(Integer idVenta);
 
-    /**
-     * Trae MovimientoInventario junto con sus relaciones en un solo SELECT con JOIN.
-     *
-     * Sin esto, al armar la respuesta fuera de la transaccion Hibernate
-     * lanzaria LazyInitializationException, porque las relaciones son LAZY.
-     */
     @Override
     @EntityGraph(attributePaths = {"producto", "usuario", "venta"})
     List<MovimientoInventario> findAll();

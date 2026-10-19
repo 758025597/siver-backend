@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/ordenes-servicio")
 public class OrdenServicioController
         extends ControladorGenerico<OrdenServicio, Integer,
-                                    OrdenServicioRequest, OrdenServicioResponse> {
+        OrdenServicioRequest, OrdenServicioResponse> {
 
     private final OrdenServicioService ordenServicioService;
     private final ClienteService clienteService;
@@ -53,25 +53,25 @@ public class OrdenServicioController
         OrdenServicio orden = new OrdenServicio();
 
         // Se validan de verdad: si no existen, responde 404 y no 409.
-        orden.setCliente(clienteService.buscarPorId(request.idCliente()));
-        orden.setTecnico(usuarioService.buscarPorId(request.idUsuario()));
+        orden.setCliente(clienteService.buscarPorId(request.getIdCliente()));
+        orden.setTecnico(usuarioService.buscarPorId(request.getIdUsuario()));
 
         // Al crear, si no mandan estado se asume el primero del flujo.
-        orden.setEstado(request.idEstado() != null
-                ? estadoOrdenService.buscarPorId(request.idEstado())
+        orden.setEstado(request.getIdEstado() != null
+                ? estadoOrdenService.buscarPorId(request.getIdEstado())
                 : estadoOrdenService.listarEnOrdenDeFlujo().getFirst());
 
-        orden.setNumeroOrden(request.numeroOrden());
-        orden.setEquipo(request.equipo());
-        orden.setMarca(request.marca());
-        orden.setModelo(request.modelo());
-        orden.setNumeroSerie(request.numeroSerie());
-        orden.setDescripcionFalla(request.descripcionFalla());
-        orden.setDiagnostico(request.diagnostico());
-        orden.setTrabajoRealizado(request.trabajoRealizado());
-        orden.setFechaEntregaEstimada(request.fechaEntregaEstimada());
-        orden.setCostoEstimado(request.costoEstimado());
-        orden.setCostoFinal(request.costoFinal());
+        orden.setNumeroOrden(request.getNumeroOrden());
+        orden.setEquipo(request.getEquipo());
+        orden.setMarca(request.getMarca());
+        orden.setModelo(request.getModelo());
+        orden.setNumeroSerie(request.getNumeroSerie());
+        orden.setDescripcionFalla(request.getDescripcionFalla());
+        orden.setDiagnostico(request.getDiagnostico());
+        orden.setTrabajoRealizado(request.getTrabajoRealizado());
+        orden.setFechaEntregaEstimada(request.getFechaEntregaEstimada());
+        orden.setCostoEstimado(request.getCostoEstimado());
+        orden.setCostoFinal(request.getCostoFinal());
         return orden;
     }
 

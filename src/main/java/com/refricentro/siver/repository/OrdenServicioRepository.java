@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.refricentro.siver.repository.IGenericRepository;
 import org.springframework.stereotype.Repository;
 
 /** Acceso a datos de las ordenes de servicio tecnico. */
 @Repository
-public interface OrdenServicioRepository extends JpaRepository<OrdenServicio, Integer> {
+public interface OrdenServicioRepository extends IGenericRepository<OrdenServicio, Integer>{
 
     Optional<OrdenServicio> findByNumeroOrden(String numeroOrden);
 

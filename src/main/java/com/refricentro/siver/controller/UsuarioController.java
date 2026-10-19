@@ -42,14 +42,14 @@ public class UsuarioController
     @Override
     protected Usuario aEntidad(UsuarioRequest request) {
         Usuario usuario = new Usuario();
-        usuario.setRol(rolService.buscarPorId(request.idRol()));
-        usuario.setNombres(request.nombres());
-        usuario.setApellidos(request.apellidos());
-        usuario.setDni(request.dni());
-        usuario.setCorreo(request.correo());
-        usuario.setTelefono(request.telefono());
+        usuario.setRol(rolService.buscarPorId(request.getIdRol()));
+        usuario.setNombres(request.getNombres());
+        usuario.setApellidos(request.getApellidos());
+        usuario.setDni(request.getDni());
+        usuario.setCorreo(request.getCorreo());
+        usuario.setTelefono(request.getTelefono());
         // En texto plano a proposito: el servicio la cifra antes de guardar.
-        usuario.setClave(request.clave());
+        usuario.setClave(request.getClave());
         return usuario;
     }
 

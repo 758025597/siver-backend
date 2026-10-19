@@ -33,10 +33,10 @@ public class EstadoOrdenController
     @Override
     protected EstadoOrden aEntidad(EstadoOrdenRequest request) {
         EstadoOrden estado = new EstadoOrden();
-        estado.setNombre(request.nombre());
-        estado.setDescripcion(request.descripcion());
-        estado.setOrdenFlujo(request.ordenFlujo());
-        estado.setEsFinal(request.esFinal());
+        estado.setNombre(request.getNombre());
+        estado.setDescripcion(request.getDescripcion());
+        estado.setOrdenFlujo(request.getOrdenFlujo());
+        estado.setEsFinal(request.getEsFinal());
         return estado;
     }
 

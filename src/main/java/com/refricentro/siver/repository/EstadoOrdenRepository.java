@@ -4,11 +4,12 @@ import com.refricentro.siver.model.EstadoOrden;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.refricentro.siver.repository.IGenericRepository;
 import org.springframework.stereotype.Repository;
 
 /** Acceso a datos del catalogo de estados de una orden de servicio. */
 @Repository
-public interface EstadoOrdenRepository extends JpaRepository<EstadoOrden, Integer> {
+public interface EstadoOrdenRepository extends IGenericRepository<EstadoOrden, Integer> {
 
     /** Los estados en el orden del flujo de atencion: Recibido, En revision, ... */
     List<EstadoOrden> findAllByOrderByOrdenFlujoAsc();

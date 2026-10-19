@@ -37,8 +37,8 @@ public class RolController
     @Override
     protected Rol aEntidad(RolRequest request) {
         Rol rol = new Rol();
-        rol.setNombre(request.nombre());
-        rol.setDescripcion(request.descripcion());
+        rol.setNombre(request.getNombre());
+        rol.setDescripcion(request.getDescripcion());
         return rol;
     }
 

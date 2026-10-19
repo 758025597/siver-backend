@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
  * puede armar la respuesta sin problemas y sin consultas de mas.
  */
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
+public interface UsuarioRepository extends IGenericRepository<Usuario, Integer> {
 
     @Override
     @EntityGraph(attributePaths = "rol")

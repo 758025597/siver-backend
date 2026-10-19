@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Una linea de la venta. Viaja SIEMPRE dentro de un VentaRequest:
@@ -18,21 +21,24 @@ import java.math.BigDecimal;
  *
  * No se pide el subtotal: lo calcula trg_detalle_venta_before_insert.
  */
-public record DetalleVentaRequest(
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class DetalleVentaRequest {
 
-        @NotNull(message = "El producto es obligatorio")
-        Integer idProducto,
+    @NotNull(message = "El producto es obligatorio")
+    private Integer idProducto;
 
-        @NotNull(message = "La cantidad es obligatoria")
-        @Positive(message = "La cantidad debe ser mayor a cero")
-        Integer cantidad,
+    @NotNull(message = "La cantidad es obligatoria")
+    @Positive(message = "La cantidad debe ser mayor a cero")
+    private Integer cantidad;
 
-        @NotNull(message = "El precio unitario es obligatorio")
-        @Positive(message = "El precio unitario debe ser mayor a cero")
-        BigDecimal precioUnitario,
+    @NotNull(message = "El precio unitario es obligatorio")
+    @Positive(message = "El precio unitario debe ser mayor a cero")
+    private BigDecimal precioUnitario;
 
-        @PositiveOrZero(message = "El descuento no puede ser negativo")
-        BigDecimal descuento) {
+    @PositiveOrZero(message = "El descuento no puede ser negativo")
+    private BigDecimal descuento;
 
     /** Si no mandan descuento, es cero. */
     public BigDecimal descuentoOCero() {

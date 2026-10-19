@@ -2,21 +2,24 @@ package com.refricentro.siver.service.impl;
 
 import com.refricentro.siver.model.Categoria;
 import com.refricentro.siver.repository.CategoriaRepository;
+import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.service.CategoriaService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CategoriaServiceImpl
         extends ServicioSoftDelete<Categoria, Integer>
         implements CategoriaService {
 
-    private final CategoriaRepository categoriaRepository;
+    private final CategoriaRepository repo;
 
-    public CategoriaServiceImpl(CategoriaRepository categoriaRepository) {
-        super(categoriaRepository);
-        this.categoriaRepository = categoriaRepository;
+    @Override
+    protected IGenericRepository<Categoria, Integer> getRepo() {
+        return repo;
     }
 
     @Override
@@ -32,6 +35,6 @@ public class CategoriaServiceImpl
 
     @Override
     public List<Categoria> listarActivos() {
-        return categoriaRepository.findByActivoTrue();
+        return repo.findByActivoTrue();
     }
 }

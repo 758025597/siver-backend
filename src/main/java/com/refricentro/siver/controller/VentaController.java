@@ -11,6 +11,7 @@ import com.refricentro.siver.service.ProductoService;
 import com.refricentro.siver.service.UsuarioService;
 import com.refricentro.siver.service.VentaService;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,16 +81,16 @@ public class VentaController {
     @PostMapping
     public ResponseEntity<VentaResponse> registrar(@Valid @RequestBody VentaRequest request) {
         Venta venta = new Venta();
-        venta.setNumeroComprobante(request.numeroComprobante());
-        venta.setTipoComprobante(request.tipoComprobante());
-        venta.setMetodoPago(request.metodoPago());
-        venta.setObservacion(request.observacion());
+        venta.setNumeroComprobante(request.getNumeroComprobante());
+        venta.setTipoComprobante(request.getTipoComprobante());
+        venta.setMetodoPago(request.getMetodoPago());
+        venta.setObservacion(request.getObservacion());
 
         // Se validan de verdad: si no existen, responde 404 y no 409.
-        venta.setCliente(clienteService.buscarPorId(request.idCliente()));
-        venta.setUsuario(usuarioService.buscarPorId(request.idUsuario()));
+        venta.setCliente(clienteService.buscarPorId(request.getIdCliente()));
+        venta.setUsuario(usuarioService.buscarPorId(request.getIdUsuario()));
 
-        List<DetalleVenta> detalles = request.detalles().stream()
+        List<DetalleVenta> detalles = request.getDetalles().stream()
                 .map(this::aDetalle)
                 .toList();
 
@@ -126,11 +127,15 @@ public class VentaController {
 
     private DetalleVenta aDetalle(DetalleVentaRequest r) {
         DetalleVenta d = new DetalleVenta();
-        d.setProducto(productoService.buscarPorId(r.idProducto()));
-        d.setCantidad(r.cantidad());
-        d.setPrecioUnitario(r.precioUnitario());
-        d.setDescuento(r.descuentoOCero());
-        d.setSubtotal(java.math.BigDecimal.ZERO); // lo calcula el trigger
+        d.setProducto(productoService.buscarPorId(r.getIdProducto()));
+        d.setCantidad(r.getCantidad());
+        d.setPrecioUnitario(r.getPrecioUnitario());
+
+        // Manejo seguro del descuento usando el getter de Lombok
+        BigDecimal descuento = r.getDescuento();
+        d.setDescuento(descuento != null ? descuento : BigDecimal.ZERO);
+
+        d.setSubtotal(BigDecimal.ZERO); // lo calcula el trigger
         return d;
     }
 

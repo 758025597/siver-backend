@@ -6,6 +6,9 @@ import com.refricentro.siver.model.Usuario;
 import com.refricentro.siver.service.RolService;
 import com.refricentro.siver.service.UsuarioService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,58 +27,50 @@ import org.springframework.web.bind.annotation.RestController;
  * Inyecta tambien RolService porque la peticion trae un idRol y hay que
  * convertirlo en el objeto Rol. De paso queda validado: si el rol no
  * existe, responde 404 con un mensaje claro.
+ *
+ * La clave NO se devuelve nunca: UsuarioResponse no tiene ese campo.
  */
 @RestController
 @RequestMapping("/api/usuarios")
+@RequiredArgsConstructor
 public class UsuarioController
         extends ControladorGenerico<Usuario, Integer, UsuarioRequest, UsuarioResponse> {
 
     private final UsuarioService usuarioService;
     private final RolService rolService;
 
-    public UsuarioController(UsuarioService usuarioService, RolService rolService) {
-        super(usuarioService);
-        this.usuarioService = usuarioService;
-        this.rolService = rolService;
+    @Qualifier("usuarioMapper")
+    private final ModelMapper mapper;
+
+    @Override
+    protected UsuarioService getServicio() {
+        return usuarioService;
     }
 
+    @Override
+    protected ModelMapper getMapper() {
+        return mapper;
+    }
+
+    @Override
+    protected Integer obtenerId(Usuario usuario) {
+        return usuario.getIdUsuario();
+    }
+
+    /**
+     * ModelMapper copia los datos simples; el rol se busca aparte.
+     * La clave llega en texto plano a proposito: el servicio la cifra.
+     */
     @Override
     protected Usuario aEntidad(UsuarioRequest request) {
-        Usuario usuario = new Usuario();
+        Usuario usuario = super.aEntidad(request);
         usuario.setRol(rolService.buscarPorId(request.getIdRol()));
-        usuario.setNombres(request.getNombres());
-        usuario.setApellidos(request.getApellidos());
-        usuario.setDni(request.getDni());
-        usuario.setCorreo(request.getCorreo());
-        usuario.setTelefono(request.getTelefono());
-        // En texto plano a proposito: el servicio la cifra antes de guardar.
-        usuario.setClave(request.getClave());
         return usuario;
-    }
-
-    @Override
-    protected UsuarioResponse aRespuesta(Usuario usuario) {
-        return new UsuarioResponse(
-                usuario.getIdUsuario(),
-                usuario.getRol() != null ? usuario.getRol().getIdRol() : null,
-                usuario.getRol() != null ? usuario.getRol().getNombre() : null,
-                usuario.getNombres(),
-                usuario.getApellidos(),
-                usuario.getDni(),
-                usuario.getCorreo(),
-                usuario.getTelefono(),
-                usuario.getActivo(),
-                usuario.getUltimoAcceso(),
-                usuario.getFechaRegistro());
-        // Nota: la clave NO se devuelve nunca.
     }
 
     /** GET /api/usuarios/activos - solo los vigentes. */
     @GetMapping("/activos")
     public ResponseEntity<List<UsuarioResponse>> listarActivos() {
-        List<UsuarioResponse> respuesta = usuarioService.listarActivos().stream()
-                .map(this::aRespuesta)
-                .toList();
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.ok(aRespuestas(usuarioService.listarActivos()));
     }
 }

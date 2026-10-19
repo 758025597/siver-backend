@@ -5,6 +5,9 @@ import com.refricentro.siver.dto.RolResponse;
 import com.refricentro.siver.model.Rol;
 import com.refricentro.siver.service.RolService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,44 +23,37 @@ import org.springframework.web.bind.annotation.RestController;
  *   PUT    /api/roles/{id}
  *   DELETE /api/roles/{id}   -> borrado logico, deja activo = false
  *
- * Aqui solo se escriben las dos conversiones y los endpoints extra.
+ * Aqui solo se elige el mapper y se escriben los endpoints extra.
  */
 @RestController
 @RequestMapping("/api/roles")
+@RequiredArgsConstructor
 public class RolController
         extends ControladorGenerico<Rol, Integer, RolRequest, RolResponse> {
 
     private final RolService rolService;
 
-    public RolController(RolService rolService) {
-        super(rolService);
-        this.rolService = rolService;
+    @Qualifier("rolMapper")
+    private final ModelMapper mapper;
+
+    @Override
+    protected RolService getServicio() {
+        return rolService;
     }
 
     @Override
-    protected Rol aEntidad(RolRequest request) {
-        Rol rol = new Rol();
-        rol.setNombre(request.getNombre());
-        rol.setDescripcion(request.getDescripcion());
-        return rol;
+    protected ModelMapper getMapper() {
+        return mapper;
     }
 
     @Override
-    protected RolResponse aRespuesta(Rol rol) {
-        return new RolResponse(
-                rol.getIdRol(),
-                rol.getNombre(),
-                rol.getDescripcion(),
-                rol.getActivo(),
-                rol.getFechaRegistro());
+    protected Integer obtenerId(Rol rol) {
+        return rol.getIdRol();
     }
 
     /** GET /api/roles/activos - solo los vigentes, para llenar los combos del frontend. */
     @GetMapping("/activos")
     public ResponseEntity<List<RolResponse>> listarActivos() {
-        List<RolResponse> respuesta = rolService.listarActivos().stream()
-                .map(this::aRespuesta)
-                .toList();
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.ok(aRespuestas(rolService.listarActivos()));
     }
 }

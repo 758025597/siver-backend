@@ -5,6 +5,9 @@ import com.refricentro.siver.dto.EstadoOrdenResponse;
 import com.refricentro.siver.model.EstadoOrden;
 import com.refricentro.siver.service.EstadoOrdenService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,34 +23,28 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/estados-orden")
+@RequiredArgsConstructor
 public class EstadoOrdenController
         extends ControladorGenerico<EstadoOrden, Integer, EstadoOrdenRequest, EstadoOrdenResponse> {
 
     private final EstadoOrdenService estadoOrdenService;
 
-    public EstadoOrdenController(EstadoOrdenService estadoOrdenService) {
-        super(estadoOrdenService);
-        this.estadoOrdenService = estadoOrdenService;
+    @Qualifier("estadoOrdenMapper")
+    private final ModelMapper mapper;
+
+    @Override
+    protected EstadoOrdenService getServicio() {
+        return estadoOrdenService;
     }
 
     @Override
-    protected EstadoOrden aEntidad(EstadoOrdenRequest request) {
-        EstadoOrden estado = new EstadoOrden();
-        estado.setNombre(request.getNombre());
-        estado.setDescripcion(request.getDescripcion());
-        estado.setOrdenFlujo(request.getOrdenFlujo());
-        estado.setEsFinal(request.getEsFinal());
-        return estado;
+    protected ModelMapper getMapper() {
+        return mapper;
     }
 
     @Override
-    protected EstadoOrdenResponse aRespuesta(EstadoOrden estado) {
-        return new EstadoOrdenResponse(
-                estado.getIdEstado(),
-                estado.getNombre(),
-                estado.getDescripcion(),
-                estado.getOrdenFlujo(),
-                estado.getEsFinal());
+    protected Integer obtenerId(EstadoOrden estado) {
+        return estado.getIdEstado();
     }
 
     /**
@@ -56,8 +53,6 @@ public class EstadoOrdenController
      */
     @GetMapping("/flujo")
     public ResponseEntity<List<EstadoOrdenResponse>> listarEnOrdenDeFlujo() {
-        return ResponseEntity.ok(estadoOrdenService.listarEnOrdenDeFlujo().stream()
-                .map(this::aRespuesta)
-                .toList());
+        return ResponseEntity.ok(aRespuestas(estadoOrdenService.listarEnOrdenDeFlujo()));
     }
 }

@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RolRequest {
 
-        @NotBlank(message = "El nombre es obligatorio")
-        @Size(min = 3, max = 50, message = "El nombre debe tener entre 3 y 50 caracteres")
+        @NotBlank(message = "{rol.nombre.notblank}")
+        @Size(min = 3, max = 50, message = "{rol.nombre.size}")
         private String nombre;
 
-        @Size(max = 200, message = "La descripcion no puede pasar de 200 caracteres")
+        @Size(max = 200, message = "{rol.descripcion.size}")
         private String descripcion;
 }

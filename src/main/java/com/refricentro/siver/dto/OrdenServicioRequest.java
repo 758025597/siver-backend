@@ -27,35 +27,35 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrdenServicioRequest {
 
-        @NotBlank(message = "El número de orden es obligatorio")
-        @Size(max = 20, message = "El número de orden no puede superar los 20 caracteres")
+        @NotBlank(message = "{ordenServicio.numeroOrden.notblank}")
+        @Size(max = 20, message = "{ordenServicio.numeroOrden.size}")
         private String numeroOrden;
 
-        @NotNull(message = "El cliente es obligatorio")
+        @NotNull(message = "{ordenServicio.idCliente.notnull}")
         private Integer idCliente;
 
         /** Técnico responsable de la atención. */
-        @NotNull(message = "El técnico es obligatorio")
+        @NotNull(message = "{ordenServicio.idUsuario.notnull}")
         private Integer idUsuario;
 
         /** Solo al crear. En el update el estado se cambia con PATCH /estado. */
         private Integer idEstado;
 
-        @NotBlank(message = "El equipo es obligatorio")
-        @Size(min = 3, max = 100, message = "El equipo debe tener entre 3 y 100 caracteres")
+        @NotBlank(message = "{ordenServicio.equipo.notblank}")
+        @Size(min = 3, max = 100, message = "{ordenServicio.equipo.size}")
         private String equipo;
 
-        @Size(max = 60, message = "La marca no puede superar los 60 caracteres")
+        @Size(max = 60, message = "{ordenServicio.marca.size}")
         private String marca;
 
-        @Size(max = 60, message = "El modelo no puede superar los 60 caracteres")
+        @Size(max = 60, message = "{ordenServicio.modelo.size}")
         private String modelo;
 
-        @Size(max = 60, message = "El número de serie no puede superar los 60 caracteres")
+        @Size(max = 60, message = "{ordenServicio.numeroSerie.size}")
         private String numeroSerie;
 
-        @NotBlank(message = "La descripción de la falla es obligatoria")
-        @Size(min = 10, message = "Describe la falla con al menos 10 caracteres")
+        @NotBlank(message = "{ordenServicio.descripcionFalla.notblank}")
+        @Size(min = 10, message = "{ordenServicio.descripcionFalla.size}")
         private String descripcionFalla;
 
         /** Obligatorio para cerrar la orden: el trigger lo exige. */
@@ -65,11 +65,11 @@ public class OrdenServicioRequest {
 
         private LocalDate fechaEntregaEstimada;
 
-        @NotNull(message = "El costo estimado es obligatorio")
-        @PositiveOrZero(message = "El costo estimado no puede ser negativo")
+        @NotNull(message = "{ordenServicio.costoEstimado.notnull}")
+        @PositiveOrZero(message = "{ordenServicio.costoEstimado.positiveorzero}")
         private BigDecimal costoEstimado;
 
         /** Obligatorio para cerrar la orden: el trigger lo exige. */
-        @PositiveOrZero(message = "El costo final no puede ser negativo")
+        @PositiveOrZero(message = "{ordenServicio.costoFinal.positiveorzero}")
         private BigDecimal costoFinal;
 }

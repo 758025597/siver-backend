@@ -15,10 +15,10 @@ import lombok.Data;
 @Data
 public class CategoriaRequest {
 
-    @NotBlank(message = "El nombre de la categoría es obligatorio")
-    @Size(min = 3, max = 80, message = "El nombre debe tener entre 3 y 80 caracteres")
+    @NotBlank(message = "{categoria.nombre.notblank}")
+    @Size(min = 3, max = 80, message = "{categoria.nombre.size}")
     private String nombre;
 
-    @Size(max = 200, message = "La descripción no puede superar los 200 caracteres")
+    @Size(max = 200, message = "{categoria.descripcion.size}")
     private String descripcion;
 }

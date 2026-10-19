@@ -18,30 +18,30 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UsuarioRequest {
 
-        @NotNull(message = "El rol es obligatorio")
+        @NotNull(message = "{usuario.idRol.notnull}")
         private Integer idRol;
 
-        @NotBlank(message = "Los nombres son obligatorios")
-        @Size(min = 2, max = 100, message = "Los nombres deben tener entre 2 y 100 caracteres")
+        @NotBlank(message = "{usuario.nombres.notblank}")
+        @Size(min = 2, max = 100, message = "{usuario.nombres.size}")
         private String nombres;
 
-        @NotBlank(message = "Los apellidos son obligatorios")
-        @Size(min = 2, max = 100, message = "Los apellidos deben tener entre 2 y 100 caracteres")
+        @NotBlank(message = "{usuario.apellidos.notblank}")
+        @Size(min = 2, max = 100, message = "{usuario.apellidos.size}")
         private String apellidos;
 
-        @NotBlank(message = "El DNI es obligatorio")
-        @Pattern(regexp = "\\d{8}", message = "El DNI debe tener exactamente 8 digitos")
+        @NotBlank(message = "{usuario.dni.notblank}")
+        @Pattern(regexp = "\\d{8}", message = "{usuario.dni.pattern}")
         private String dni;
 
-        @NotBlank(message = "El correo es obligatorio")
-        @Email(message = "El correo no tiene un formato valido")
-        @Size(max = 120, message = "El correo no puede pasar de 120 caracteres")
+        @NotBlank(message = "{usuario.correo.notblank}")
+        @Email(message = "{usuario.correo.email}")
+        @Size(max = 120, message = "{usuario.correo.size}")
         private String correo;
 
-        @NotBlank(message = "La clave es obligatoria")
-        @Size(min = 6, max = 72, message = "La clave debe tener entre 6 y 72 caracteres")
+        @NotBlank(message = "{usuario.clave.notblank}")
+        @Size(min = 6, max = 72, message = "{usuario.clave.size}")
         private String clave;
 
-        @Pattern(regexp = "9\\d{8}", message = "El celular debe tener 9 digitos y empezar en 9")
+        @Pattern(regexp = "9\\d{8}", message = "{usuario.telefono.pattern}")
         private String telefono;
 }

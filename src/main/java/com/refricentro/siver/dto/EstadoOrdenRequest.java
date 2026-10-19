@@ -22,19 +22,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EstadoOrdenRequest {
 
-        @NotBlank(message = "El nombre del estado es obligatorio")
-        @Size(max = 50, message = "El nombre no puede superar los 50 caracteres")
+        @NotBlank(message = "{estadoOrden.nombre.notblank}")
+        @Size(max = 50, message = "{estadoOrden.nombre.size}")
         private String nombre;
 
-        @Size(max = 200, message = "La descripción no puede superar los 200 caracteres")
+        @Size(max = 200, message = "{estadoOrden.descripcion.size}")
         private String descripcion;
 
         /** Posición dentro del flujo: 1 Recibido, 2 En revisión, 3 En reparación... */
-        @NotNull(message = "El orden de flujo es obligatorio")
-        @Positive(message = "El orden de flujo debe ser mayor a cero")
+        @NotNull(message = "{estadoOrden.ordenFlujo.notnull}")
+        @Positive(message = "{estadoOrden.ordenFlujo.positive}")
         private Byte ordenFlujo;
 
         /** true si es un estado que cierra la orden: Entregado o Cancelado. */
-        @NotNull(message = "Debe indicar si es un estado final")
+        @NotNull(message = "{estadoOrden.esFinal.notnull}")
         private Boolean esFinal;
 }

@@ -25,32 +25,32 @@ import lombok.Data;
 @Data
 public class ProductoRequest {
 
-    @NotBlank(message = "El código del producto es obligatorio")
-    @Size(max = 30, message = "El código no puede superar los 30 caracteres")
+    @NotBlank(message = "{producto.codigo.notblank}")
+    @Size(max = 30, message = "{producto.codigo.size}")
     private String codigo;
 
-    @NotBlank(message = "El nombre del producto es obligatorio")
-    @Size(min = 3, max = 150, message = "El nombre debe tener entre 3 y 150 caracteres")
+    @NotBlank(message = "{producto.nombre.notblank}")
+    @Size(min = 3, max = 150, message = "{producto.nombre.size}")
     private String nombre;
 
-    @Size(max = 300, message = "La descripción no puede superar los 300 caracteres")
+    @Size(max = 300, message = "{producto.descripcion.size}")
     private String descripcion;
 
-    @NotNull(message = "La categoría es obligatoria")
+    @NotNull(message = "{producto.idCategoria.notnull}")
     private Integer idCategoria;
 
     /** Opcional: la columna id_proveedor admite NULL. */
     private Integer idProveedor;
 
-    @NotNull(message = "La unidad de medida es obligatoria")
+    @NotNull(message = "{producto.unidadMedida.notnull}")
     private UnidadMedida unidadMedida;
 
-    @NotNull(message = "El precio de compra es obligatorio")
-    @PositiveOrZero(message = "El precio de compra no puede ser negativo")
+    @NotNull(message = "{producto.precioCompra.notnull}")
+    @PositiveOrZero(message = "{producto.precioCompra.positiveorzero}")
     private BigDecimal precioCompra;
 
-    @NotNull(message = "El precio de venta es obligatorio")
-    @Positive(message = "El precio de venta debe ser mayor a cero")
+    @NotNull(message = "{producto.precioVenta.notnull}")
+    @Positive(message = "{producto.precioVenta.positive}")
     private BigDecimal precioVenta;
 
     /**
@@ -58,12 +58,12 @@ public class ProductoRequest {
      * Al actualizar se ignora, porque el stock lo mantienen los triggers.
      * Para ajustarlo se registra un movimiento de inventario.
      */
-    @NotNull(message = "El stock es obligatorio")
-    @PositiveOrZero(message = "El stock no puede ser negativo")
+    @NotNull(message = "{producto.stock.notnull}")
+    @PositiveOrZero(message = "{producto.stock.positiveorzero}")
     private Integer stock;
 
-    @NotNull(message = "El stock mínimo es obligatorio")
-    @PositiveOrZero(message = "El stock mínimo no puede ser negativo")
+    @NotNull(message = "{producto.stockMinimo.notnull}")
+    @PositiveOrZero(message = "{producto.stockMinimo.positiveorzero}")
     private Integer stockMinimo;
 
     /**
@@ -73,7 +73,7 @@ public class ProductoRequest {
      * @Min no llegan ahi. Para esos casos Bean Validation ofrece @AssertTrue.
      */
     @JsonIgnore
-    @AssertTrue(message = "El precio de venta no puede ser menor al precio de compra")
+    @AssertTrue(message = "{producto.margenValido.asserttrue}")
     public boolean isMargenValido() {
         // Si falta alguno, ya lo reportan los @NotNull de arriba.
         if (precioCompra == null || precioVenta == null) {

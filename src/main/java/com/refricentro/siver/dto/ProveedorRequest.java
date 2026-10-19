@@ -21,25 +21,25 @@ import lombok.Data;
 @Data
 public class ProveedorRequest {
 
-    @NotBlank(message = "El RUC es obligatorio")
+    @NotBlank(message = "{proveedor.ruc.notblank}")
     @Pattern(regexp = "(10|15|17|20)\\d{9}",
-            message = "El RUC debe tener 11 dígitos y empezar en 10, 15, 17 o 20")
+            message = "{proveedor.ruc.pattern}")
     private String ruc;
 
-    @NotBlank(message = "La razón social es obligatoria")
-    @Size(min = 3, max = 150, message = "La razón social debe tener entre 3 y 150 caracteres")
+    @NotBlank(message = "{proveedor.razonSocial.notblank}")
+    @Size(min = 3, max = 150, message = "{proveedor.razonSocial.size}")
     private String razonSocial;
 
-    @Size(max = 100, message = "El contacto no puede superar los 100 caracteres")
+    @Size(max = 100, message = "{proveedor.contacto.size}")
     private String contacto;
 
-    @Pattern(regexp = "\\d{9}", message = "El teléfono debe tener 9 dígitos")
+    @Pattern(regexp = "\\d{9}", message = "{proveedor.telefono.pattern}")
     private String telefono;
 
-    @Email(message = "El correo debe tener un formato válido")
-    @Size(max = 120, message = "El correo no puede superar los 120 caracteres")
+    @Email(message = "{proveedor.correo.email}")
+    @Size(max = 120, message = "{proveedor.correo.size}")
     private String correo;
 
-    @Size(max = 200, message = "La dirección no puede superar los 200 caracteres")
+    @Size(max = 200, message = "{proveedor.direccion.size}")
     private String direccion;
 }

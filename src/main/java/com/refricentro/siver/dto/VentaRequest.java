@@ -29,31 +29,31 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VentaRequest {
 
-    @NotBlank(message = "El número de comprobante es obligatorio")
-    @Size(max = 20, message = "El número de comprobante no puede superar los 20 caracteres")
+    @NotBlank(message = "{venta.numeroComprobante.notblank}")
+    @Size(max = 20, message = "{venta.numeroComprobante.size}")
     private String numeroComprobante;
 
-    @NotNull(message = "El tipo de comprobante es obligatorio")
+    @NotNull(message = "{venta.tipoComprobante.notnull}")
     private Venta.TipoComprobante tipoComprobante;
 
-    @NotNull(message = "El cliente es obligatorio")
+    @NotNull(message = "{venta.idCliente.notnull}")
     private Integer idCliente;
 
     /** Vendedor que emite el comprobante. */
-    @NotNull(message = "El vendedor es obligatorio")
+    @NotNull(message = "{venta.idUsuario.notnull}")
     private Integer idUsuario;
 
-    @NotNull(message = "El método de pago es obligatorio")
+    @NotNull(message = "{venta.metodoPago.notnull}")
     private Venta.MetodoPago metodoPago;
 
-    @Size(max = 300, message = "La observación no puede superar los 300 caracteres")
+    @Size(max = 300, message = "{venta.observacion.size}")
     private String observacion;
 
     /**
      * Las lineas. El @Valid hace que se validen una por una:
      * sin el, Bean Validation solo comprueba que la lista no este vacia.
      */
-    @NotEmpty(message = "La venta debe tener al menos un producto")
+    @NotEmpty(message = "{venta.detalles.notempty}")
     @Valid
     private List<DetalleVentaRequest> detalles;
 
@@ -63,7 +63,7 @@ public class VentaRequest {
      * con cantidad 5.
      */
     @JsonIgnore
-    @AssertTrue(message = "Hay un producto repetido: agrupa las unidades en una sola línea")
+    @AssertTrue(message = "{venta.sinProductosRepetidos.asserttrue}")
     public boolean isSinProductosRepetidos() {
         if (detalles == null) {
             return true;

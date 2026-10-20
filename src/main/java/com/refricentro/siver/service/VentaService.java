@@ -1,7 +1,7 @@
 package com.refricentro.siver.service;
 
-import com.refricentro.siver.modelos.DetalleVenta;
-import com.refricentro.siver.modelos.Venta;
+import com.refricentro.siver.model.DetalleVenta;
+import com.refricentro.siver.model.Venta;
 import java.util.List;
 
 /**

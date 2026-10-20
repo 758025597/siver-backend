@@ -20,26 +20,26 @@ import lombok.Data;
 @Data
 public class ClienteRequest {
 
-    @NotBlank(message = "El tipo de documento es obligatorio")
-    @Pattern(regexp = "DNI|RUC|CE", message = "El tipo de documento debe ser DNI, RUC o CE")
+    @NotBlank(message = "{cliente.tipoDocumento.notblank}")
+    @Pattern(regexp = "DNI|RUC|CE", message = "{cliente.tipoDocumento.pattern}")
     private String tipoDocumento;
 
-    @NotBlank(message = "El número de documento es obligatorio")
-    @Size(max = 12, message = "El número de documento no puede superar los 12 caracteres")
+    @NotBlank(message = "{cliente.numeroDocumento.notblank}")
+    @Size(max = 12, message = "{cliente.numeroDocumento.size}")
     private String numeroDocumento;
 
-    @NotBlank(message = "Los nombres son obligatorios")
-    @Size(min = 3, max = 150, message = "Los nombres deben tener entre 3 y 150 caracteres")
+    @NotBlank(message = "{cliente.nombres.notblank}")
+    @Size(min = 3, max = 150, message = "{cliente.nombres.size}")
     private String nombres;
 
-    @Pattern(regexp = "9\\d{8}", message = "El teléfono debe tener 9 dígitos y comenzar con 9")
+    @Pattern(regexp = "9\\d{8}", message = "{cliente.telefono.pattern}")
     private String telefono;
 
-    @Email(message = "El correo debe tener un formato válido")
-    @Size(max = 120, message = "El correo no puede superar los 120 caracteres")
+    @Email(message = "{cliente.correo.email}")
+    @Size(max = 120, message = "{cliente.correo.size}")
     private String correo;
 
-    @Size(max = 200, message = "La dirección no puede superar los 200 caracteres")
+    @Size(max = 200, message = "{cliente.direccion.size}")
     private String direccion;
 
     /**
@@ -50,7 +50,7 @@ public class ClienteRequest {
      * método que devuelve true si la combinación es válida.
      */
     @JsonIgnore
-    @AssertTrue(message = "El número no corresponde al tipo de documento: "
+    @AssertTrue(message = "{cliente.documentoValido.asserttrue}"
             + "DNI son 8 dígitos, RUC son 11 empezando en 10/15/17/20, CE son de 9 a 12 dígitos")
     public boolean isDocumentoValido() {
         // Si falta alguno, ya lo reportan los @NotBlank de arriba.

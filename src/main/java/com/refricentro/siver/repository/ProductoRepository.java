@@ -1,7 +1,7 @@
+
 package com.refricentro.siver.repository;
 
-import com.refricentro.siver.modelos.Producto;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.refricentro.siver.model.Producto;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductoRepository extends JpaRepository<Producto, Integer> {
+public interface ProductoRepository extends IGenericRepository<Producto, Integer> {
 
     List<Producto> findByActivoTrue();
 

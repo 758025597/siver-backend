@@ -1,22 +1,25 @@
 package com.refricentro.siver.service.impl;
 
-import com.refricentro.siver.modelos.Cliente;
+import com.refricentro.siver.model.Cliente;
 import com.refricentro.siver.repository.ClienteRepository;
+import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.service.ClienteService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ClienteServiceImpl
         extends ServicioSoftDelete<Cliente, Integer>
         implements ClienteService {
 
-    private final ClienteRepository clienteRepository;
+    private final ClienteRepository repo;
 
-    public ClienteServiceImpl(ClienteRepository clienteRepository) {
-        super(clienteRepository);
-        this.clienteRepository = clienteRepository;
+    @Override
+    protected IGenericRepository<Cliente, Integer> getRepo() {
+        return repo;
     }
 
     @Override
@@ -36,6 +39,6 @@ public class ClienteServiceImpl
 
     @Override
     public List<Cliente> listarActivos() {
-        return clienteRepository.findByActivoTrue();
+        return repo.findByActivoTrue();
     }
 }

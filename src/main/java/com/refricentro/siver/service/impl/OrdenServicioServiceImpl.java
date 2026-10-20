@@ -1,28 +1,20 @@
+
 package com.refricentro.siver.service.impl;
 
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
-import com.refricentro.siver.modelos.EstadoOrden;
-import com.refricentro.siver.modelos.OrdenServicio;
+import com.refricentro.siver.model.EstadoOrden;
+import com.refricentro.siver.model.OrdenServicio;
 import com.refricentro.siver.repository.EstadoOrdenRepository;
+import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.repository.OrdenServicioRepository;
 import com.refricentro.siver.service.OrdenServicioService;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Logica de las ordenes de servicio tecnico.
- *
- * Hereda de ServicioGenerico porque orden_servicio NO tiene columna `activo`,
- * asi que no puede implementar Activable. Pero su borrado NO puede ser fisico:
- * una orden es el historial de atencion a un cliente.
- *
- * Por eso se sobrescribe eliminar(): en vez de borrar la fila, mueve la orden
- * al estado "Cancelado". Ese es el soft delete de esta entidad: su ciclo de
- * vida son los estados, no una bandera.
- */
 @Service
-public class OrdenServicioServiceImpl extends ServicioGenerico<OrdenServicio, Integer>
+public class OrdenServicioServiceImpl
+        extends ServicioGenerico<OrdenServicio, Integer>
         implements OrdenServicioService {
 
     private static final String ESTADO_CANCELADO = "Cancelado";
@@ -30,11 +22,16 @@ public class OrdenServicioServiceImpl extends ServicioGenerico<OrdenServicio, In
     private final OrdenServicioRepository ordenServicioRepository;
     private final EstadoOrdenRepository estadoOrdenRepository;
 
-    public OrdenServicioServiceImpl(OrdenServicioRepository ordenServicioRepository,
-                                    EstadoOrdenRepository estadoOrdenRepository) {
-        super(ordenServicioRepository);
+    public OrdenServicioServiceImpl(
+            OrdenServicioRepository ordenServicioRepository,
+            EstadoOrdenRepository estadoOrdenRepository) {
         this.ordenServicioRepository = ordenServicioRepository;
         this.estadoOrdenRepository = estadoOrdenRepository;
+    }
+
+    @Override
+    protected IGenericRepository<OrdenServicio, Integer> getRepo() {
+        return ordenServicioRepository;
     }
 
     @Override
@@ -42,15 +39,6 @@ public class OrdenServicioServiceImpl extends ServicioGenerico<OrdenServicio, In
         return "OrdenServicio";
     }
 
-    /**
-     * Campos editables con un PUT.
-     *
-     * No se copian: el id, numero_orden (es el identificador del comprobante),
-     * fecha_ingreso (la pone MySQL) ni fecha_entrega_real (la pone el trigger
-     * trg_orden_before_update cuando la orden llega a un estado final).
-     *
-     * El estado tampoco se cambia por aqui: para eso esta cambiarEstado().
-     */
     @Override
     protected void copiarDatos(OrdenServicio origen, OrdenServicio destino) {
         destino.setCliente(origen.getCliente());
@@ -67,14 +55,6 @@ public class OrdenServicioServiceImpl extends ServicioGenerico<OrdenServicio, In
         destino.setCostoFinal(origen.getCostoFinal());
     }
 
-    /**
-     * BORRADO LOGICO: la orden pasa a "Cancelado", la fila se queda.
-     *
-     * Ojo: el trigger exige diagnostico y costo_final para cerrar una orden,
-     * porque "Cancelado" es un estado final. Si faltan, MySQL lo rechaza y el
-     * manejador global lo devuelve como 400 con el motivo. Es correcto: no se
-     * cancela una orden sin dejar constancia de por que.
-     */
     @Override
     @Transactional
     public void eliminar(Integer id) {
@@ -88,7 +68,8 @@ public class OrdenServicioServiceImpl extends ServicioGenerico<OrdenServicio, In
     public OrdenServicio cambiarEstado(Integer idOrden, Integer idEstado) {
         OrdenServicio orden = buscarPorId(idOrden);
         EstadoOrden estado = estadoOrdenRepository.findById(idEstado)
-                .orElseThrow(() -> new RecursoNoEncontradoException("EstadoOrden", idEstado));
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException("EstadoOrden", idEstado));
         orden.setEstado(estado);
         return ordenServicioRepository.save(orden);
     }

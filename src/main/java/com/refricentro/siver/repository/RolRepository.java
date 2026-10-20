@@ -1,10 +1,10 @@
 package com.refricentro.siver.repository;
 
-import com.refricentro.siver.modelos.Rol;
+import com.refricentro.siver.model.Rol;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import com.refricentro.siver.repository.IGenericRepository;
 
 /**
  * Acceso a datos de la tabla rol.
@@ -13,7 +13,9 @@ import org.springframework.stereotype.Repository;
  * Aqui solo se agregan las consultas propias de rol.
  */
 @Repository
-public interface RolRepository extends JpaRepository<Rol, Integer> {
+
+public interface RolRepository extends IGenericRepository<Rol, Integer> {
+
 
     /** Solo los roles vigentes. El listado normal no debe mostrar los desactivados. */
     List<Rol> findByActivoTrue();

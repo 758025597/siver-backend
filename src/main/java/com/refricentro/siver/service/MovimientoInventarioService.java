@@ -1,6 +1,6 @@
 package com.refricentro.siver.service;
 
-import com.refricentro.siver.modelos.MovimientoInventario;
+import com.refricentro.siver.model.MovimientoInventario;
 import java.util.List;
 
 /**

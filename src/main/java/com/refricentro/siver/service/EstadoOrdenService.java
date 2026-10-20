@@ -1,6 +1,6 @@
 package com.refricentro.siver.service;
 
-import com.refricentro.siver.modelos.EstadoOrden;
+import com.refricentro.siver.model.EstadoOrden;
 import java.util.List;
 
 /**

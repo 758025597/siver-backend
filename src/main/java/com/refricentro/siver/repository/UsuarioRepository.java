@@ -1,6 +1,6 @@
 package com.refricentro.siver.repository;
 
-import com.refricentro.siver.modelos.Usuario;
+import com.refricentro.siver.model.Usuario;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
  * puede armar la respuesta sin problemas y sin consultas de mas.
  */
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
+public interface UsuarioRepository extends IGenericRepository<Usuario, Integer> {
 
     @Override
     @EntityGraph(attributePaths = "rol")

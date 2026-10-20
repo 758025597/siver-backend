@@ -1,4 +1,4 @@
-package com.refricentro.siver.modelos.enums;
+package com.refricentro.siver.model.enums;
 
 /**
  * Unidades de medida con las que se comercializa un producto.

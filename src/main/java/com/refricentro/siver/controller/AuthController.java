@@ -2,11 +2,12 @@ package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.LoginRequest;
 import com.refricentro.siver.dto.LoginResponse;
-import com.refricentro.siver.modelos.Usuario;
+import com.refricentro.siver.model.Usuario;
 import com.refricentro.siver.security.JwtUtil;
 import com.refricentro.siver.service.UsuarioService;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,19 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UsuarioService usuarioService;
-
-    public AuthController(AuthenticationManager authenticationManager,
-                          JwtUtil jwtUtil,
-                          UsuarioService usuarioService) {
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-        this.usuarioService = usuarioService;
-    }
 
     /**
      * POST /api/auth/login
@@ -55,14 +49,14 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.correo(), request.clave()));
+                    new UsernamePasswordAuthenticationToken(request.getCorreo(), request.getClave()));
         } catch (DisabledException e) {
             return ResponseEntity.status(401).body(error("La cuenta esta desactivada"));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body(error("Correo o clave incorrectos"));
         }
 
-        Usuario usuario = usuarioService.buscarPorCorreo(request.correo());
+        Usuario usuario = usuarioService.buscarPorCorreo(request.getCorreo());
         String rol = usuario.getRol() != null ? usuario.getRol().getNombre() : "SIN_ROL";
 
         // Deja constancia de cuando entro. Es para lo que existe la columna.

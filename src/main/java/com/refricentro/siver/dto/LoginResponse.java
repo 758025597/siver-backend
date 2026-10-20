@@ -1,5 +1,9 @@
 package com.refricentro.siver.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * Lo que devuelve el login.
  *
@@ -10,13 +14,17 @@ package com.refricentro.siver.dto;
  * pueda mostrar su nombre y decidir que menus enseñar segun el rol, sin
  * tener que hacer otra consulta.
  */
-public record LoginResponse(
-        String token,
-        String tipo,
-        long expiraEnMs,
-        Integer idUsuario,
-        String nombres,
-        String apellidos,
-        String correo,
-        String rol) {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LoginResponse {
+
+    private String token;
+    private String tipo;
+    private long expiraEnMs;
+    private Integer idUsuario;
+    private String nombres;
+    private String apellidos;
+    private String correo;
+    private String rol;
 }

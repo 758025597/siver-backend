@@ -1,8 +1,9 @@
 package com.refricentro.siver.security;
 
-import com.refricentro.siver.modelos.Usuario;
+import com.refricentro.siver.model.Usuario;
 import com.refricentro.siver.repository.UsuarioRepository;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,13 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
  * El prefijo ROLE_ es una convencion que Spring Security espera.
  */
 @Service
+@RequiredArgsConstructor
 public class DetalleUsuarioService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
-
-    public DetalleUsuarioService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
 
     @Override
     @Transactional(readOnly = true)

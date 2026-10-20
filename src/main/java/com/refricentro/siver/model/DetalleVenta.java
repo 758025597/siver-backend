@@ -1,10 +1,11 @@
-package com.refricentro.siver.modelos;
+package com.refricentro.siver.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
@@ -18,24 +19,28 @@ import java.math.BigDecimal;
                 )
         }
 )
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class DetalleVenta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_detalle")
+    @EqualsAndHashCode.Include
     private Integer idDetalle;
 
     /** Cabecera a la que pertenece esta linea. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_venta", nullable = false)
+    @JoinColumn(name = "id_venta", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_detalle_venta"))
+    @ToString.Exclude
     private Venta venta;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_producto", nullable = false)
+    @JoinColumn(name = "id_producto", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_detalle_producto"))
     private Producto producto;
 
     @Column(name = "cantidad", nullable = false)

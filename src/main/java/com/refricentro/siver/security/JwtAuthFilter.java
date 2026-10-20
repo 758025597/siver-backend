@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +29,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * peticion, aunque haya reenvios internos.
  */
 @Component
+@RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static final String CABECERA = "Authorization";
@@ -35,11 +37,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final DetalleUsuarioService detalleUsuarioService;
-
-    public JwtAuthFilter(JwtUtil jwtUtil, DetalleUsuarioService detalleUsuarioService) {
-        this.jwtUtil = jwtUtil;
-        this.detalleUsuarioService = detalleUsuarioService;
-    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,

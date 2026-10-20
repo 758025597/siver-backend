@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Una linea de la venta. Viaja SIEMPRE dentro de un VentaRequest:
@@ -18,21 +21,24 @@ import java.math.BigDecimal;
  *
  * No se pide el subtotal: lo calcula trg_detalle_venta_before_insert.
  */
-public record DetalleVentaRequest(
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class DetalleVentaRequest {
 
-        @NotNull(message = "El producto es obligatorio")
-        Integer idProducto,
+    @NotNull(message = "{detalleVenta.idProducto.notnull}")
+    private Integer idProducto;
 
-        @NotNull(message = "La cantidad es obligatoria")
-        @Positive(message = "La cantidad debe ser mayor a cero")
-        Integer cantidad,
+    @NotNull(message = "{detalleVenta.cantidad.notnull}")
+    @Positive(message = "{detalleVenta.cantidad.positive}")
+    private Integer cantidad;
 
-        @NotNull(message = "El precio unitario es obligatorio")
-        @Positive(message = "El precio unitario debe ser mayor a cero")
-        BigDecimal precioUnitario,
+    @NotNull(message = "{detalleVenta.precioUnitario.notnull}")
+    @Positive(message = "{detalleVenta.precioUnitario.positive}")
+    private BigDecimal precioUnitario;
 
-        @PositiveOrZero(message = "El descuento no puede ser negativo")
-        BigDecimal descuento) {
+    @PositiveOrZero(message = "{detalleVenta.descuento.positiveorzero}")
+    private BigDecimal descuento;
 
     /** Si no mandan descuento, es cero. */
     public BigDecimal descuentoOCero() {
@@ -41,7 +47,7 @@ public record DetalleVentaRequest(
 
     /** Valida ck_detalle_descuento: el descuento no puede superar el importe. */
     @JsonIgnore
-    @AssertTrue(message = "El descuento no puede ser mayor al importe de la línea")
+    @AssertTrue(message = "{detalleVenta.descuentoValido.asserttrue}")
     public boolean isDescuentoValido() {
         if (cantidad == null || precioUnitario == null) {
             return true; // ya lo reportan los @NotNull

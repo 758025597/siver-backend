@@ -1,5 +1,6 @@
-package com.refricentro.siver.modelos;
+package com.refricentro.siver.model;
 
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,26 +20,28 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
-import com.refricentro.siver.modelos.enums.UnidadMedida;
+import com.refricentro.siver.model.enums.UnidadMedida;
 
 /** Mapeo de la tabla producto. */
 @Entity
 @Table(name = "producto")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Producto implements Activable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_producto")
+    @EqualsAndHashCode.Include
     private Integer idProducto;
 
     @NotBlank
@@ -57,12 +60,14 @@ public class Producto implements Activable {
 
     /** FK obligatoria hacia categoria. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_categoria", nullable = false)
+    @JoinColumn(name = "id_categoria", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_producto_categoria"))
     private Categoria categoria;
 
     /** FK opcional: id_proveedor admite NULL en la tabla. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_proveedor")
+    @JoinColumn(name = "id_proveedor",
+            foreignKey = @ForeignKey(name = "fk_producto_proveedor"))
     private Proveedor proveedor;
 
     /** ENUM de MySQL guardado como texto, no como numero. */

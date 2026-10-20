@@ -19,4 +19,19 @@ public record LoginResponse(
         String apellidos,
         String correo,
         String rol) {
+
+    public UserInfo user() {
+        return new UserInfo(idUsuario, nombres, apellidos, correo, rol);
+    }
+
+    public record UserInfo(
+            Integer idUsuario,
+            String nombres,
+            String apellidos,
+            String correo,
+            String rol) {
+        public String username() {
+            return correo;
+        }
+    }
 }

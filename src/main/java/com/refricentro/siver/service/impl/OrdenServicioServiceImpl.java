@@ -6,6 +6,9 @@ import com.refricentro.siver.modelos.OrdenServicio;
 import com.refricentro.siver.repository.EstadoOrdenRepository;
 import com.refricentro.siver.repository.OrdenServicioRepository;
 import com.refricentro.siver.service.OrdenServicioService;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,6 +112,22 @@ public class OrdenServicioServiceImpl extends ServicioGenerico<OrdenServicio, In
     @Transactional(readOnly = true)
     public List<OrdenServicio> listarPorEstado(Integer idEstado) {
         return ordenServicioRepository.findByEstado_IdEstado(idEstado);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrdenServicio> listarPorRangoFechas(LocalDate desde, LocalDate hasta) {
+        if (desde == null || hasta == null) {
+            throw new IllegalArgumentException("Las fechas 'desde' y 'hasta' son obligatorias.");
+        }
+        if (desde.isAfter(hasta)) {
+            throw new IllegalArgumentException("La fecha 'desde' no puede ser posterior a 'hasta'.");
+        }
+
+        LocalDateTime inicio = desde.atStartOfDay();
+        LocalDateTime fin = hasta.atTime(LocalTime.MAX);
+
+        return ordenServicioRepository.findByRangoFechasIngreso(inicio, fin);
     }
 
     private EstadoOrden estadoCancelado() {

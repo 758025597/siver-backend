@@ -7,12 +7,15 @@ import com.refricentro.siver.service.ClienteService;
 import com.refricentro.siver.service.EstadoOrdenService;
 import com.refricentro.siver.service.OrdenServicioService;
 import com.refricentro.siver.service.UsuarioService;
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -121,5 +124,13 @@ public class OrdenServicioController
     @GetMapping("/estado/{idEstado}")
     public ResponseEntity<List<OrdenServicioResponse>> porEstado(@PathVariable Integer idEstado) {
         return responder(ordenServicioService.listarPorEstado(idEstado));
+    }
+
+    /** GET /api/ordenes-servicio/rango-fechas?desde=2026-11-01&hasta=2026-11-10 - filtro por fecha de ingreso. */
+    @GetMapping("/rango-fechas")
+    public ResponseEntity<List<OrdenServicioResponse>> porRangoFechas(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return responder(ordenServicioService.listarPorRangoFechas(desde, hasta));
     }
 }

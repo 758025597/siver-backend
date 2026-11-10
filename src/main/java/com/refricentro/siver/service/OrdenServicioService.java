@@ -1,6 +1,7 @@
 package com.refricentro.siver.service;
 
 import com.refricentro.siver.modelos.OrdenServicio;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -19,4 +20,6 @@ public interface OrdenServicioService extends CrudService<OrdenServicio, Integer
     List<OrdenServicio> listarPorTecnico(Integer idUsuario);
 
     List<OrdenServicio> listarPorEstado(Integer idEstado);
+
+    List<OrdenServicio> listarPorRangoFechas(LocalDate desde, LocalDate hasta);
 }

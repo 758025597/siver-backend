@@ -2579,6 +2579,170 @@
             },
             "description": ""
           }
+        },
+        {
+          "name": "12. Historial de ventas de un cliente, paginado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test('Trae totalElements y totalPages', () => { pm.expect(p).to.have.property('totalElements'); pm.expect(p).to.have.property('totalPages'); });",
+                  "pm.test('size limitado a 50', () => pm.expect(p.size).to.eql(50));",
+                  "pm.test('Todas son del cliente', () => p.content.forEach(v => pm.expect(v.idCliente).to.eql(Number(pm.collectionVariables.get('rbCliente')))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas/cliente/{{rbCliente}}?page=0&size=1000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "cliente",
+                "{{rbCliente}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "1000"
+                }
+              ]
+            },
+            "description": "Fatima: historial paginado de un cliente (Page de Spring). Usa el cliente que dejo la peticion 9."
+          }
+        },
+        {
+          "name": "13. Historial de un cliente que no existe -> 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas/cliente/999999?page=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "cliente",
+                "999999"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "14. Ordenes por rango de fechas (JPQL :desde :hasta)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Todas dentro del rango', () => pm.response.json().forEach(o => pm.expect(o.fechaIngreso.slice(0, 4)).to.eql('2026')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordenes-servicio/rango-fechas?desde=2026-01-01&hasta=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordenes-servicio",
+                "rango-fechas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-12-31"
+                }
+              ]
+            },
+            "description": "Daniel: JPQL con :desde y :hasta (@Param)."
+          }
+        },
+        {
+          "name": "15. Rango de fechas al reves -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));",
+                  "pm.test('Explica el motivo', () => pm.expect(pm.response.json().mensaje).to.include('desde'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordenes-servicio/rango-fechas?desde=2026-12-31&hasta=2026-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordenes-servicio",
+                "rango-fechas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-12-31"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-01-01"
+                }
+              ]
+            },
+            "description": ""
+          }
         }
       ]
     }

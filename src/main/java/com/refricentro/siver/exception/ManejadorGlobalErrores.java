@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,6 +61,29 @@ public class ManejadorGlobalErrores {
                 + esperado + ", pero llego: " + ex.getValue();
         return ResponseEntity.badRequest()
                 .body(ErrorRespuesta.de(400, "Parametro invalido", mensaje));
+    }
+
+    /**
+     * 400 - falta un parametro obligatorio de la URL.
+     *
+     * Pasa con /api/ordenes-servicio/rango-fechas sin ?desde= o sin ?hasta=.
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorRespuesta> parametroFaltante(MissingServletRequestParameterException ex) {
+        return ResponseEntity.badRequest()
+                .body(ErrorRespuesta.de(400, "Parametro faltante",
+                        "Falta el parametro '" + ex.getParameterName() + "'"));
+    }
+
+    /**
+     * 400 - un dato que llega bien escrito pero no tiene sentido, por ejemplo
+     * un rango de fechas donde 'desde' es posterior a 'hasta'. Lo lanzan los
+     * servicios con un mensaje pensado para el usuario.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorRespuesta> argumentoInvalido(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest()
+                .body(ErrorRespuesta.de(400, "Dato invalido", ex.getMessage()));
     }
 
     /**

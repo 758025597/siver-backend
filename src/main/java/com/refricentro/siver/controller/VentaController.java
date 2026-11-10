@@ -162,7 +162,7 @@ public class VentaController {
     @ApiResponse(responseCode = "404", description = "No existe el cliente",
             content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     @GetMapping("/cliente/{idCliente}")
-    public ResponseEntity<Page<VentaResponse>> porCliente(
+    public ResponseEntity<PaginaResponse<VentaResponse>> porCliente(
             @PathVariable Integer idCliente,
             @PageableDefault(
                     page = 0,
@@ -174,11 +174,11 @@ public class VentaController {
         // Verifica que el cliente exista.
         clienteService.buscarPorId(idCliente);
 
-        Page<VentaResponse> resultado =
-                ventaService.listarPorClientePaginado(idCliente, pageable)
-                        .map(this::aRespuesta);
-
-        return ResponseEntity.ok(resultado);
+        // PaginaResponse y no el Page de Spring: el JSON de PageImpl no es
+        // estable entre versiones (Spring lo avisa en el log) y asi todas
+        // las paginas de la API tienen el mismo formato.
+        Page<Venta> pagina = ventaService.listarPorClientePaginado(idCliente, pageable);
+        return ResponseEntity.ok(PaginaResponse.de(pagina, this::aRespuesta));
     }
 
     /** GET /api/ventas/vendedor/{idUsuario} - ventas de un vendedor. */

@@ -6,6 +6,8 @@ import com.refricentro.siver.model.Producto;
 import com.refricentro.siver.service.CategoriaService;
 import com.refricentro.siver.service.ProductoService;
 import com.refricentro.siver.service.ProveedorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  * si la categoria no existe, responde 404 con un mensaje claro en vez de
  * dejar que reviente la llave foranea de MySQL.
  */
+@Tag(name = "Productos", description = "Inventario de productos. El stock lo mueven los triggers.")
 @RestController
 @RequestMapping("/api/productos")
 @RequiredArgsConstructor
@@ -74,6 +77,7 @@ public class ProductoController
     }
 
     /** GET /api/productos/activos - solo los vigentes. */
+    @Operation(summary = "Lista solo los registros activos (para combos)")
     @GetMapping("/activos")
     public ResponseEntity<List<ProductoResponse>> listarActivos() {
         return ResponseEntity.ok(aRespuestas(productoService.listarActivos()));
@@ -83,6 +87,7 @@ public class ProductoController
      * GET /api/productos/stock-bajo - los que llegaron al minimo.
      * Sirve para la alerta de reposicion del dashboard.
      */
+    @Operation(summary = "Productos con stock en o por debajo del minimo")
     @GetMapping("/stock-bajo")
     public ResponseEntity<List<ProductoResponse>> listarConStockBajo() {
         return ResponseEntity.ok(aRespuestas(productoService.buscarConStockBajo()));

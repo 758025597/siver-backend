@@ -4,6 +4,8 @@ import com.refricentro.siver.dto.EstadoOrdenRequest;
 import com.refricentro.siver.dto.EstadoOrdenResponse;
 import com.refricentro.siver.model.EstadoOrden;
 import com.refricentro.siver.service.EstadoOrdenService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Aun asi, MySQL lo impide si alguna orden esta usando ese estado, porque
  * la llave foranea es ON DELETE RESTRICT: en ese caso responde 409.
  */
+@Tag(name = "Estados de orden", description = "Catalogo de estados del servicio tecnico. Unico DELETE fisico.")
 @RestController
 @RequestMapping("/api/estados-orden")
 @RequiredArgsConstructor
@@ -51,6 +54,7 @@ public class EstadoOrdenController
      * GET /api/estados-orden/flujo - los estados en el orden de atencion.
      * Sirve para dibujar la linea de tiempo de una orden en el frontend.
      */
+    @Operation(summary = "Estados en el orden del flujo de trabajo")
     @GetMapping("/flujo")
     public ResponseEntity<List<EstadoOrdenResponse>> listarEnOrdenDeFlujo() {
         return ResponseEntity.ok(aRespuestas(estadoOrdenService.listarEnOrdenDeFlujo()));

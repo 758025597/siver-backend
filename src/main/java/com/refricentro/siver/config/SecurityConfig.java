@@ -24,7 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  *                   podria entrar nunca.
  *   - OPTIONS       abierto: el navegador manda esa peticion antes de cada
  *                   llamada real (preflight de CORS) y no lleva token.
- *   - todo lo demas exige un JWT valido.
+ *   - Swagger       abierto: es solo la documentacion.
+ *   - todo lo demas exige un JWT valido. Sin token -> 401.
  *
  * STATELESS significa que el servidor no guarda sesiones: cada peticion se
  * identifica sola con su token. Es lo que corresponde en una API REST.
@@ -33,6 +34,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    /** La pagina de Swagger y el JSON que lee. */
+    private static final String[] RUTAS_SWAGGER = {
+            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
+    };
 
     private final JwtAuthFilter jwtAuthFilter;
     private final PuntoEntradaNoAutorizado puntoEntradaNoAutorizado;
@@ -43,6 +49,11 @@ public class SecurityConfig {
             // La API no usa formularios ni cookies de sesion, asi que el
             // token CSRF no aplica. Se desactiva porque si no bloquea los POST.
             .csrf(csrf -> csrf.disable())
+
+            // Ni formulario de login de Spring ni usuario/clave por cabecera:
+            // la unica forma de entrar es POST /api/auth/login con JWT.
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
 
             // Usa la configuracion de CorsConfig.
             .cors(cors -> {})
@@ -55,6 +66,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
+                    // Swagger solo muestra la documentacion: abrirlo NO abre la
+                    // API. Cada endpoint sigue exigiendo el token.
+                    .requestMatchers(RUTAS_SWAGGER).permitAll()
                     .anyRequest().authenticated())
 
             // El filtro del token corre ANTES del de usuario y contrasena:

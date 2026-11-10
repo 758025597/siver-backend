@@ -7,6 +7,8 @@ import com.refricentro.siver.service.ClienteService;
 import com.refricentro.siver.service.EstadoOrdenService;
 import com.refricentro.siver.service.OrdenServicioService;
 import com.refricentro.siver.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  * validar que los ids que llegan existan, y asi responder 404 con un
  * mensaje claro en vez de dejar que reviente la llave foranea.
  */
+@Tag(name = "Ordenes de servicio", description = "Ordenes del servicio tecnico y su flujo de estados.")
 @RestController
 @RequestMapping("/api/ordenes-servicio")
 @RequiredArgsConstructor
@@ -79,6 +82,7 @@ public class OrdenServicioController
      * Al pasar a un estado final, el trigger trg_orden_before_update exige
      * diagnostico y costo_final, y pone la fecha de entrega real solo.
      */
+    @Operation(summary = "Cambia el estado de una orden")
     @PatchMapping("/{id}/estado/{idEstado}")
     public ResponseEntity<OrdenServicioResponse> cambiarEstado(@PathVariable Integer id,
                                                                @PathVariable Integer idEstado) {
@@ -86,18 +90,21 @@ public class OrdenServicioController
     }
 
     /** GET /api/ordenes-servicio/cliente/{idCliente} - historial de un cliente. */
+    @Operation(summary = "Lista los registros de un cliente")
     @GetMapping("/cliente/{idCliente}")
     public ResponseEntity<List<OrdenServicioResponse>> porCliente(@PathVariable Integer idCliente) {
         return ResponseEntity.ok(aRespuestas(ordenServicioService.listarPorCliente(idCliente)));
     }
 
     /** GET /api/ordenes-servicio/tecnico/{idUsuario} - carga de trabajo de un tecnico. */
+    @Operation(summary = "Ordenes asignadas a un tecnico")
     @GetMapping("/tecnico/{idUsuario}")
     public ResponseEntity<List<OrdenServicioResponse>> porTecnico(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok(aRespuestas(ordenServicioService.listarPorTecnico(idUsuario)));
     }
 
     /** GET /api/ordenes-servicio/estado/{idEstado} - por ejemplo, las pendientes. */
+    @Operation(summary = "Ordenes en un estado")
     @GetMapping("/estado/{idEstado}")
     public ResponseEntity<List<OrdenServicioResponse>> porEstado(@PathVariable Integer idEstado) {
         return ResponseEntity.ok(aRespuestas(ordenServicioService.listarPorEstado(idEstado)));

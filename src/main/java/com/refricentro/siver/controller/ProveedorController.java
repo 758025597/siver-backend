@@ -4,6 +4,8 @@ import com.refricentro.siver.dto.ProveedorRequest;
 import com.refricentro.siver.dto.ProveedorResponse;
 import com.refricentro.siver.model.Proveedor;
 import com.refricentro.siver.service.ProveedorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Proveedores", description = "Proveedores con RUC de 11 digitos. DELETE es logico.")
 @RestController
 @RequestMapping("/api/proveedores")
 @RequiredArgsConstructor
@@ -40,6 +43,7 @@ public class ProveedorController
     }
 
     /** GET /api/proveedores/activos - solo los vigentes, para los combos del frontend. */
+    @Operation(summary = "Lista solo los registros activos (para combos)")
     @GetMapping("/activos")
     public ResponseEntity<List<ProveedorResponse>> listarActivos() {
         return ResponseEntity.ok(aRespuestas(servicio.listarActivos()));

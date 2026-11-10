@@ -2,9 +2,16 @@ package com.refricentro.siver.controller;
 
 import com.refricentro.siver.dto.LoginRequest;
 import com.refricentro.siver.dto.LoginResponse;
+import com.refricentro.siver.exception.ErrorRespuesta;
 import com.refricentro.siver.model.Usuario;
 import com.refricentro.siver.security.JwtUtil;
 import com.refricentro.siver.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  *   POST /api/auth/login  ->  devuelve el JWT
  */
+@Tag(name = "Autenticacion", description = "Inicio de sesion con JWT. Es el unico endpoint abierto sin token.")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -44,7 +52,18 @@ public class AuthController {
      *
      * Nunca se dice si fallo el correo o la clave: decirlo le confirmaria a
      * un atacante que ese correo existe.
+     *
+     * @SecurityRequirements() vacio: en Swagger este endpoint NO pide el
+     * candado, porque justamente es el que entrega el token.
      */
+    @Operation(summary = "Inicia sesion y devuelve el JWT",
+            description = "Copia el token de la respuesta y pegalo en el boton Authorize de Swagger.")
+    @SecurityRequirements
+    @ApiResponse(responseCode = "200", description = "Login correcto, devuelve el token",
+            content = @Content(schema = @Schema(implementation = LoginResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Falta el correo o la clave",
+            content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
+    @ApiResponse(responseCode = "401", description = "Correo o clave incorrectos, o cuenta desactivada")
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {

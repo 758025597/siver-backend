@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -59,6 +60,19 @@ public class ManejadorGlobalErrores {
                 + esperado + ", pero llego: " + ex.getValue();
         return ResponseEntity.badRequest()
                 .body(ErrorRespuesta.de(400, "Parametro invalido", mensaje));
+    }
+
+    /**
+     * 400 - se pidio ordenar por un campo que la entidad no tiene.
+     *
+     * Pasa con /api/clientes/paginado?sort=noExiste,asc. Sin este handler se
+     * iba al 500 generico, cuando el error es del que hizo la peticion.
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ErrorRespuesta> ordenInvalido(PropertyReferenceException ex) {
+        return ResponseEntity.badRequest()
+                .body(ErrorRespuesta.de(400, "Orden invalido",
+                        "No se puede ordenar por '" + ex.getPropertyName() + "'"));
     }
 
     /**

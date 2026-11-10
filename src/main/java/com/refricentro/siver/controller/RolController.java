@@ -4,6 +4,8 @@ import com.refricentro.siver.dto.RolRequest;
 import com.refricentro.siver.dto.RolResponse;
 import com.refricentro.siver.model.Rol;
 import com.refricentro.siver.service.RolService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * Aqui solo se elige el mapper y se escriben los endpoints extra.
  */
+@Tag(name = "Roles", description = "Roles de los usuarios del sistema. DELETE es logico.")
 @RestController
 @RequestMapping("/api/roles")
 @RequiredArgsConstructor
@@ -52,6 +55,7 @@ public class RolController
     }
 
     /** GET /api/roles/activos - solo los vigentes, para llenar los combos del frontend. */
+    @Operation(summary = "Lista solo los registros activos (para combos)")
     @GetMapping("/activos")
     public ResponseEntity<List<RolResponse>> listarActivos() {
         return ResponseEntity.ok(aRespuestas(rolService.listarActivos()));

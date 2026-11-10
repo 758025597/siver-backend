@@ -1,6 +1,7 @@
 package com.refricentro.siver.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -26,17 +27,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DetalleVentaRequest {
 
+    @Schema(description = "Identificador del producto vendido", example = "1")
     @NotNull(message = "{detalleVenta.idProducto.notnull}")
     private Integer idProducto;
 
+    @Schema(description = "Cantidad de unidades del producto", example = "2")
     @NotNull(message = "{detalleVenta.cantidad.notnull}")
     @Positive(message = "{detalleVenta.cantidad.positive}")
     private Integer cantidad;
 
+    @Schema(description = "Precio unitario del producto", example = "150.00")
     @NotNull(message = "{detalleVenta.precioUnitario.notnull}")
     @Positive(message = "{detalleVenta.precioUnitario.positive}")
     private BigDecimal precioUnitario;
 
+    @Schema(description = "Descuento aplicado a la linea", example = "10.00")
     @PositiveOrZero(message = "{detalleVenta.descuento.positiveorzero}")
     private BigDecimal descuento;
 

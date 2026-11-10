@@ -2,6 +2,7 @@ package com.refricentro.siver.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.refricentro.siver.model.Venta;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -29,23 +30,29 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VentaRequest {
 
+    @Schema(description = "Número del comprobante de venta", example = "B001-0000125")
     @NotBlank(message = "{venta.numeroComprobante.notblank}")
     @Size(max = 20, message = "{venta.numeroComprobante.size}")
     private String numeroComprobante;
 
+    @Schema(description = "Tipo de comprobante de venta", example = "BOLETA")
     @NotNull(message = "{venta.tipoComprobante.notnull}")
     private Venta.TipoComprobante tipoComprobante;
 
+    @Schema(description = "Identificador del cliente que realiza la compra", example = "1")
     @NotNull(message = "{venta.idCliente.notnull}")
     private Integer idCliente;
 
+    @Schema(description = "Identificador del vendedor que emite el comprobante", example = "2")
     /** Vendedor que emite el comprobante. */
     @NotNull(message = "{venta.idUsuario.notnull}")
     private Integer idUsuario;
 
+    @Schema(description = "Método de pago utilizado", example = "EFECTIVO")
     @NotNull(message = "{venta.metodoPago.notnull}")
     private Venta.MetodoPago metodoPago;
 
+    @Schema(description = "Observaciones adicionales de la venta", example = "Entrega en tienda")
     @Size(max = 300, message = "{venta.observacion.size}")
     private String observacion;
 
@@ -53,6 +60,10 @@ public class VentaRequest {
      * Las lineas. El @Valid hace que se validen una por una:
      * sin el, Bean Validation solo comprueba que la lista no este vacia.
      */
+    @Schema(
+            description = "Lista de productos incluidos en la venta",
+            example = "[{\"idProducto\":1,\"cantidad\":2}]"
+    )
     @NotEmpty(message = "{venta.detalles.notempty}")
     @Valid
     private List<DetalleVentaRequest> detalles;

@@ -1,5 +1,6 @@
 package com.refricentro.siver.service.impl;
 
+
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
 import com.refricentro.siver.model.DetalleVenta;
 import com.refricentro.siver.model.Venta;
@@ -137,6 +138,13 @@ public class VentaServiceImpl implements VentaService {
     @Transactional(readOnly = true)
     public List<Venta> listarPorCliente(Integer idCliente) {
         return ventaRepository.findByCliente_IdCliente(idCliente);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Venta> listarPorClientePaginado(
+            Integer idCliente, Pageable pageable) {
+
+        return ventaRepository.findByCliente_IdCliente(idCliente, pageable);
     }
 
     @Override

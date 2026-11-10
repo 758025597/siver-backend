@@ -27,7 +27,10 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -149,11 +152,33 @@ public class VentaController {
         return ResponseEntity.ok(aRespuesta(ventaService.anular(id)));
     }
 
-    /** GET /api/ventas/cliente/{idCliente} - historial de compras de un cliente. */
-    @Operation(summary = "Lista los registros de un cliente")
+    /**
+     * GET /api/ventas/cliente/{idCliente}
+     * Historial de ventas de un cliente con paginación.
+     */
+    @Operation(summary = "Historial de compras de un cliente, paginado",
+            description = "page empieza en 0, size maximo 50. Por defecto, las ventas mas recientes primero.")
+    @ApiResponse(responseCode = "200", description = "Una pagina con content, totalElements y totalPages")
+    @ApiResponse(responseCode = "404", description = "No existe el cliente",
+            content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     @GetMapping("/cliente/{idCliente}")
-    public ResponseEntity<List<VentaResponse>> porCliente(@PathVariable Integer idCliente) {
-        return ResponseEntity.ok(aRespuestas(ventaService.listarPorCliente(idCliente)));
+    public ResponseEntity<Page<VentaResponse>> porCliente(
+            @PathVariable Integer idCliente,
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "fechaVenta",
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable) {
+
+        // Verifica que el cliente exista.
+        clienteService.buscarPorId(idCliente);
+
+        Page<VentaResponse> resultado =
+                ventaService.listarPorClientePaginado(idCliente, pageable)
+                        .map(this::aRespuesta);
+
+        return ResponseEntity.ok(resultado);
     }
 
     /** GET /api/ventas/vendedor/{idUsuario} - ventas de un vendedor. */

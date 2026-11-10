@@ -5,6 +5,10 @@ import com.refricentro.siver.model.Venta;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +30,9 @@ public interface VentaRepository extends IGenericRepository<Venta, Integer> {
     List<Venta> findByEstado(Venta.EstadoVenta estado);
 
     List<Venta> findByCliente_IdCliente(Integer idCliente);
+
+    @EntityGraph(attributePaths = {"cliente", "usuario"})
+    Page<Venta> findByCliente_IdCliente(Integer idCliente, Pageable pageable);
 
     List<Venta> findByUsuario_IdUsuario(Integer idUsuario);
 

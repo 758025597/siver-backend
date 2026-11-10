@@ -2,9 +2,12 @@ package com.refricentro.siver.service.impl;
 
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
 import com.refricentro.siver.model.MovimientoInventario;
+import com.refricentro.siver.model.enums.TipoMovimiento;
 import com.refricentro.siver.repository.MovimientoInventarioRepository;
 import com.refricentro.siver.service.MovimientoInventarioService;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,12 @@ public class MovimientoInventarioServiceImpl implements MovimientoInventarioServ
     @Override
     public List<MovimientoInventario> listar() {
         return repositorio.findAll();
+    }
+
+    @Override
+    public Page<MovimientoInventario> listarPaginado(String texto, TipoMovimiento tipo, Integer idProducto,
+                                                     Pageable pageable) {
+        return repositorio.buscar(texto == null ? "" : texto.trim(), tipo, idProducto, pageable);
     }
 
     @Override

@@ -8,6 +8,8 @@ import com.refricentro.siver.repository.VentaRepository;
 import com.refricentro.siver.service.VentaService;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,9 +61,19 @@ public class VentaServiceImpl implements VentaService {
      * El refresh() vuelve a leer la fila desde la base, ya con los montos
      * calculados. Sin el, la API devolveria una venta con total 0.00 aunque
      * en la base estuviera correcta.
+     *
+     * ROLLBACK: cabecera, lineas, descuento de stock y bitacora van en UNA
+     * sola transaccion. Si una linea falla (por ejemplo el trigger lanza
+     * 'Stock insuficiente' en la segunda linea), se deshace todo; no queda la
+     * cabecera suelta, ni el stock descontado de la primera linea, ni su
+     * movimiento de inventario. Lo comprueba VentaRollbackTest contra MySQL.
+     *
+     * Por defecto @Transactional solo hace rollback con excepciones NO
+     * verificadas (RuntimeException y Error). rollbackFor = Exception.class
+     * lo extiende a las verificadas, para que ninguna deje datos a medias.
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Venta registrar(Venta venta, List<DetalleVenta> detalles) {
         Venta guardada = ventaRepository.save(venta);
 
@@ -80,6 +92,15 @@ public class VentaServiceImpl implements VentaService {
     @Transactional(readOnly = true)
     public List<Venta> listar() {
         return ventaRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Venta> listarPaginado(String filtro, Pageable pageable) {
+        if (filtro == null || filtro.isBlank()) {
+            return ventaRepository.findAll(pageable);
+        }
+        return ventaRepository.buscar(filtro.trim(), pageable);
     }
 
     @Override

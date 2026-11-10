@@ -6,6 +6,8 @@ import com.refricentro.siver.repository.EstadoOrdenRepository;
 import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.service.EstadoOrdenService;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,5 +44,11 @@ public class EstadoOrdenServiceImpl
     @Transactional(readOnly = true)
     public List<EstadoOrden> listarEnOrdenDeFlujo() {
         return estadoOrdenRepository.findAllByOrderByOrdenFlujoAsc();
+    }
+
+    /** Busqueda paginada con la consulta JPQL del repositorio. */
+    @Override
+    protected Page<EstadoOrden> buscar(String texto, Pageable pageable) {
+        return estadoOrdenRepository.buscar(texto, pageable);
     }
 }

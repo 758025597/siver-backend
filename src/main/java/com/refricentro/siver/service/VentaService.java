@@ -3,6 +3,8 @@ package com.refricentro.siver.service;
 import com.refricentro.siver.model.DetalleVenta;
 import com.refricentro.siver.model.Venta;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Operaciones sobre las ventas.
@@ -35,6 +37,9 @@ public interface VentaService {
     Venta registrar(Venta venta, List<DetalleVenta> detalles);
 
     List<Venta> listar();
+
+    /** Una pagina de ventas, opcionalmente filtrada por comprobante o cliente. */
+    Page<Venta> listarPaginado(String filtro, Pageable pageable);
 
     Venta buscarPorId(Integer id);
 

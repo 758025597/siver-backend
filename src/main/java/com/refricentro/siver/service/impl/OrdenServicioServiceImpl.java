@@ -9,6 +9,8 @@ import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.repository.OrdenServicioRepository;
 import com.refricentro.siver.service.OrdenServicioService;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,5 +98,11 @@ public class OrdenServicioServiceImpl
         return estadoOrdenRepository.findByNombreIgnoreCase(ESTADO_CANCELADO)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "EstadoOrden con nombre", ESTADO_CANCELADO));
+    }
+
+    /** Busqueda paginada con la consulta JPQL del repositorio. */
+    @Override
+    protected Page<OrdenServicio> buscar(String texto, Pageable pageable) {
+        return ordenServicioRepository.buscar(texto, pageable);
     }
 }

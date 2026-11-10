@@ -6,6 +6,8 @@ import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.repository.RolRepository;
 import com.refricentro.siver.service.RolService;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,5 +41,11 @@ public class RolServiceImpl extends ServicioSoftDelete<Rol, Integer>
     @Transactional(readOnly = true)
     public List<Rol> listarActivos() {
         return rolRepository.findByActivoTrue();
+    }
+
+    /** Busqueda paginada con la consulta JPQL del repositorio. */
+    @Override
+    protected Page<Rol> buscar(String texto, Pageable pageable) {
+        return rolRepository.buscar(texto, pageable);
     }
 }

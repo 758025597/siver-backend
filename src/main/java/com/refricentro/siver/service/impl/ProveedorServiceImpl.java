@@ -5,6 +5,8 @@ import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.repository.ProveedorRepository;
 import com.refricentro.siver.service.ProveedorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,5 +42,11 @@ public class ProveedorServiceImpl
     @Override
     public List<Proveedor> listarActivos() {
         return repo.findByActivoTrue();
+    }
+
+    /** Busqueda paginada con la consulta JPQL del repositorio. */
+    @Override
+    protected Page<Proveedor> buscar(String texto, Pageable pageable) {
+        return repo.buscar(texto, pageable);
     }
 }

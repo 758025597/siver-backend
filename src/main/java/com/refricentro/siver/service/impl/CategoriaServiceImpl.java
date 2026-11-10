@@ -5,6 +5,8 @@ import com.refricentro.siver.repository.CategoriaRepository;
 import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.service.CategoriaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,5 +38,11 @@ public class CategoriaServiceImpl
     @Override
     public List<Categoria> listarActivos() {
         return repo.findByActivoTrue();
+    }
+
+    /** Busqueda paginada con la consulta JPQL del repositorio. */
+    @Override
+    protected Page<Categoria> buscar(String texto, Pageable pageable) {
+        return repo.buscar(texto, pageable);
     }
 }

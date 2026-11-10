@@ -21,6 +21,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 /**
  * Endpoints de ventas.
@@ -109,11 +113,28 @@ public class VentaController {
     }
 
     /** GET /api/ventas/cliente/{idCliente} - historial de compras de un cliente. */
+    /**
+     * GET /api/ventas/cliente/{idCliente}
+     * Historial de ventas de un cliente con paginación.
+     */
     @GetMapping("/cliente/{idCliente}")
-    public ResponseEntity<List<VentaResponse>> porCliente(@PathVariable Integer idCliente) {
-        return ResponseEntity.ok(ventaService.listarPorCliente(idCliente).stream()
-                .map(this::aRespuesta)
-                .toList());
+    public ResponseEntity<Page<VentaResponse>> porCliente(
+            @PathVariable Integer idCliente,
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "fechaVenta",
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable) {
+
+        // Verifica que el cliente exista.
+        clienteService.buscarPorId(idCliente);
+
+        Page<VentaResponse> resultado =
+                ventaService.listarPorClientePaginado(idCliente, pageable)
+                        .map(this::aRespuesta);
+
+        return ResponseEntity.ok(resultado);
     }
 
     /** GET /api/ventas/vendedor/{idUsuario} - ventas de un vendedor. */

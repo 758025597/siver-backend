@@ -1,5 +1,6 @@
 package com.refricentro.siver.service.impl;
 
+
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
 import com.refricentro.siver.model.DetalleVenta;
 import com.refricentro.siver.model.Venta;
@@ -8,6 +9,8 @@ import com.refricentro.siver.repository.VentaRepository;
 import com.refricentro.siver.service.VentaService;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,6 +119,13 @@ public class VentaServiceImpl implements VentaService {
     @Transactional(readOnly = true)
     public List<Venta> listarPorCliente(Integer idCliente) {
         return ventaRepository.findByCliente_IdCliente(idCliente);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Venta> listarPorClientePaginado(
+            Integer idCliente, Pageable pageable) {
+
+        return ventaRepository.findByCliente_IdCliente(idCliente, pageable);
     }
 
     @Override

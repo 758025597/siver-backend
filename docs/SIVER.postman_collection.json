@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "SIVER - Refricentro Peregrino",
-    "description": "Evidencias de la T1.\n\nCOMO USARLA:\n1. Levanta la API (mvnw spring-boot:run).\n2. Ejecuta primero '00 - Seguridad > 3. Login correcto'. El token se guarda solo.\n3. Luego puedes usar Run collection: cada POST guarda su id y el siguiente lo reutiliza.\n\nLos datos unicos (DNI, RUC, codigos) se generan al azar en cada ejecucion, asi que la puedes correr las veces que quieras sin chocar con la base.",
+    "description": "Evidencias de la T1 y la R3 (carpeta 13).\n\nCOMO USARLA:\n1. Levanta la API (mvnw spring-boot:run).\n2. Ejecuta primero '00 - Seguridad > 3. Login correcto'. El token se guarda solo.\n3. Luego puedes usar Run collection: cada POST guarda su id y el siguiente lo reutiliza.\n\nLos datos unicos (DNI, RUC, codigos) se generan al azar en cada ejecucion, asi que la puedes correr las veces que quieras sin chocar con la base.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -81,6 +81,42 @@
     },
     {
       "key": "tokenFalso",
+      "value": ""
+    },
+    {
+      "key": "rbComprobante",
+      "value": ""
+    },
+    {
+      "key": "rbProductoA",
+      "value": ""
+    },
+    {
+      "key": "rbPrecioA",
+      "value": ""
+    },
+    {
+      "key": "rbStockA",
+      "value": ""
+    },
+    {
+      "key": "rbProductoB",
+      "value": ""
+    },
+    {
+      "key": "rbPrecioB",
+      "value": ""
+    },
+    {
+      "key": "rbCantidadB",
+      "value": ""
+    },
+    {
+      "key": "rbCliente",
+      "value": ""
+    },
+    {
+      "key": "rbUsuario",
       "value": ""
     }
   ],
@@ -289,7 +325,6 @@
                 "api",
                 "roles"
               ]
-              
             },
             "description": "Simula a alguien que se inventa un token. Se conserva la cabecera y los datos, pero se altera la firma: la API lo rechaza con 401 porque la firma se valida con la clave secreta del servidor."
           }
@@ -2083,6 +2118,467 @@
             }
           ],
           "description": null
+        }
+      ]
+    },
+    {
+      "name": "13 - R3: Paginacion, JPQL y rollback",
+      "description": "Evidencias de la R3. Correr antes '00 - Seguridad > 3. Login correcto'.",
+      "item": [
+        {
+          "name": "1. Paginado: primera pagina (page=0)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test('Trae totalElements y totalPages', () => { pm.expect(p).to.have.property('totalElements'); pm.expect(p).to.have.property('totalPages'); });",
+                  "pm.test('Es la pagina 0', () => pm.expect(p.number).to.eql(0));",
+                  "pm.test('Maximo 5 registros', () => pm.expect(p.content.length).to.be.at.most(5));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes/paginado?page=0&size=5&sort=idCliente,desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clientes",
+                "paginado"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "idCliente,desc"
+                }
+              ]
+            },
+            "description": "La primera pagina es la 0. La respuesta trae content, totalElements y totalPages: con eso Angular arma el paginador."
+          }
+        },
+        {
+          "name": "2. Paginado: segunda pagina (page=1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test('Trae totalElements y totalPages', () => { pm.expect(p).to.have.property('totalElements'); pm.expect(p).to.have.property('totalPages'); });",
+                  "pm.test('Es la pagina 1', () => pm.expect(p.number).to.eql(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes/paginado?page=1&size=5&sort=idCliente,desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clientes",
+                "paginado"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "idCliente,desc"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "3. Tamano maximo: pide 1000, recibe 50",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Spring limito el size a 50', () => pm.expect(pm.response.json().size).to.eql(50));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/paginado?size=1000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "paginado"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "1000"
+                }
+              ]
+            },
+            "description": "spring.data.web.pageable.max-page-size=50: nadie puede traerse la tabla entera de un golpe."
+          }
+        },
+        {
+          "name": "4. Busqueda JPQL con parametro nombrado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test('Trae totalElements y totalPages', () => { pm.expect(p).to.have.property('totalElements'); pm.expect(p).to.have.property('totalPages'); });",
+                  "pm.test('Es la pagina 0', () => pm.expect(p.number).to.eql(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/paginado?buscar=gas&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "paginado"
+              ],
+              "query": [
+                {
+                  "key": "buscar",
+                  "value": "gas"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "ProductoRepository.buscar(): @Query con :texto y @Param(\"texto\"). Busca en codigo, nombre, descripcion, categoria y proveedor."
+          }
+        },
+        {
+          "name": "5. Intento de inyeccion SQL (no funciona)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('No devuelve toda la tabla', () => pm.expect(pm.response.json().totalElements).to.eql(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/proveedores/paginado?buscar=' OR 1=1 --",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "proveedores",
+                "paginado"
+              ],
+              "query": [
+                {
+                  "key": "buscar",
+                  "value": "' OR 1=1 --"
+                }
+              ]
+            },
+            "description": "Como el texto viaja como parametro (:texto) y no se concatena, se busca literalmente \"' OR 1=1 --\" y no encuentra nada."
+          }
+        },
+        {
+          "name": "6. Orden por un campo que no existe -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('Explica el campo', () => pm.expect(pm.response.json().mensaje).to.include('noExiste'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias/paginado?sort=noExiste,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categorias",
+                "paginado"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "noExiste,asc"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "7. Paginado SIN token -> 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 sin token', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas/paginado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "paginado"
+              ]
+            },
+            "description": "Swagger solo documenta: quien protege es Spring Security.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "8. Kardex paginado filtrado por tipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test('Trae totalElements y totalPages', () => { pm.expect(p).to.have.property('totalElements'); pm.expect(p).to.have.property('totalPages'); });",
+                  "pm.test('Es la pagina 0', () => pm.expect(p.number).to.eql(0));",
+                  "pm.test('Solo salidas', () => p.content.forEach(m => pm.expect(m.tipoMovimiento).to.eql('SALIDA')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/movimientos-inventario/paginado?tipo=SALIDA&size=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "movimientos-inventario",
+                "paginado"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "SALIDA"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Dos parametros nombrados en la misma JPQL: :texto y :tipo."
+          }
+        },
+        {
+          "name": "9. ROLLBACK: venta que falla en la 2da linea -> 400",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Arma una venta de 2 lineas: la 1ra entra bien, la 2da pide mas stock del que hay.",
+                  "const base = pm.collectionVariables.get('baseUrl');",
+                  "const h = [{ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('token') }];",
+                  "pm.collectionVariables.set('rbComprobante', 'RB-' + Date.now());",
+                  "pm.sendRequest({ url: base + '/api/productos/activos', header: h }, (e, r) => {",
+                  "  const ps = r.json().filter(p => p.stock > 0);",
+                  "  pm.collectionVariables.set('rbProductoA', ps[0].idProducto);",
+                  "  pm.collectionVariables.set('rbPrecioA', ps[0].precioVenta);",
+                  "  pm.collectionVariables.set('rbStockA', ps[0].stock);",
+                  "  pm.collectionVariables.set('rbProductoB', ps[1].idProducto);",
+                  "  pm.collectionVariables.set('rbPrecioB', ps[1].precioVenta);",
+                  "  pm.collectionVariables.set('rbCantidadB', ps[1].stock + 1);",
+                  "});",
+                  "pm.sendRequest({ url: base + '/api/clientes/activos', header: h }, (e, r) => pm.collectionVariables.set('rbCliente', r.json()[0].idCliente));",
+                  "pm.sendRequest({ url: base + '/api/usuarios/activos', header: h }, (e, r) => pm.collectionVariables.set('rbUsuario', r.json()[0].id));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400: el trigger rechazo la 2da linea', () => pm.response.to.have.status(400));",
+                  "pm.test('Motivo: stock insuficiente', () => pm.expect(pm.response.json().mensaje).to.include('Stock insuficiente'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ventas"
+              ]
+            },
+            "description": "Fuerza un error A MITAD del proceso: cuando falla la 2da linea, la cabecera y la 1ra linea (con su descuento de stock y su movimiento) ya estaban escritas. @Transactional las deshace. Luego correr 10 y 11, o en MySQL:\n  SELECT * FROM venta WHERE numero_comprobante = '<rbComprobante>';  -- 0 filas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroComprobante\": \"{{rbComprobante}}\",\n  \"tipoComprobante\": \"BOLETA\",\n  \"idCliente\": {{rbCliente}},\n  \"idUsuario\": {{rbUsuario}},\n  \"metodoPago\": \"EFECTIVO\",\n  \"detalles\": [\n    { \"idProducto\": {{rbProductoA}}, \"cantidad\": 1, \"precioUnitario\": {{rbPrecioA}} },\n    { \"idProducto\": {{rbProductoB}}, \"cantidad\": {{rbCantidadB}}, \"precioUnitario\": {{rbPrecioB}} }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "10. ROLLBACK: la venta NO quedo guardada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('No existe ninguna venta con ese comprobante', () => pm.expect(pm.response.json().totalElements).to.eql(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas/paginado?buscar={{rbComprobante}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "paginado"
+              ],
+              "query": [
+                {
+                  "key": "buscar",
+                  "value": "{{rbComprobante}}"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "11. ROLLBACK: el stock de la 1ra linea no se desconto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El stock sigue igual que antes de la venta', () =>",
+                  "  pm.expect(pm.response.json().stock).to.eql(Number(pm.collectionVariables.get('rbStockA'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/productos/{{rbProductoA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "{{rbProductoA}}"
+              ]
+            },
+            "description": ""
+          }
         }
       ]
     }

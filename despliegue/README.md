@@ -6,7 +6,7 @@ y se comunica con los demás por la red:
 | Componente | Tecnología | Servidor | Puerto |
 |---|---|---|---|
 | Frontend | Angular 22 (compilado) | Apache HTTP Server 2.4 | 80 |
-| Backend | Spring Boot 4.1 (`siver.war`) | Apache Tomcat 11 (Java 21) | 8080 |
+| Backend | Spring Boot 4.1 (`siver.war`) | Apache Tomcat 11 (Java 25) | 8080 |
 | Base de datos | MySQL 8 (`siver_bd`) | MySQL Server | 3306 |
 
 Esta carpeta tiene todo lo necesario para dos escenarios:
@@ -29,7 +29,7 @@ flowchart LR
     end
 
     subgraph VMB["VM-Backend · 192.168.56.20"]
-        TOMCAT["Apache Tomcat 11 · Java 21<br/>:8080<br/>siver.war → /siver/api<br/>setenv.sh (variables de entorno)"]
+        TOMCAT["Apache Tomcat 11 · Java 25<br/>:8080<br/>siver.war → /siver/api<br/>setenv.sh (variables de entorno)"]
     end
 
     subgraph VMD["VM-BD · 192.168.56.30"]
@@ -50,7 +50,7 @@ en `http://192.168.56.20:8080/siver/api`, y por eso el backend debe autorizar co
 | Máquina | Rol | IP | Puertos abiertos | Software |
 |---|---|---|---|---|
 | VM-Frontend | Servidor web | 192.168.56.10 | 80 | Apache HTTP Server 2.4 |
-| VM-Backend | Servidor de aplicaciones | 192.168.56.20 | 8080 | Java 21, Tomcat 11 |
+| VM-Backend | Servidor de aplicaciones | 192.168.56.20 | 8080 | Java 25, Tomcat 11 |
 | VM-BD | Servidor de base de datos | 192.168.56.30 | 3306 (solo desde .20) | MySQL 8 |
 
 En VirtualBox, los adaptadores de red van en modo **Red solo-anfitrión (host-only)**
@@ -76,7 +76,7 @@ En VirtualBox, los adaptadores de red van en modo **Red solo-anfitrión (host-on
 
 ### 2.2 VM-Backend (Tomcat 11)
 
-1. Instalar Java 21 y Apache Tomcat 11.
+1. Instalar Java 25 y Apache Tomcat 11.
 2. Variables de entorno en el servidor (credenciales, JWT, CORS):
    copiar [`servidores/backend/setenv.sh`](servidores/backend/setenv.sh) (Linux) o
    [`setenv.bat`](servidores/backend/setenv.bat) (Windows) a la carpeta `bin` de Tomcat y completar los valores.
@@ -161,7 +161,7 @@ flowchart LR
 | Servicio | Contenedor | Imagen | Puerto publicado | Healthcheck |
 |---|---|---|---|---|
 | `db` | siver-db | mysql:8.4 | 3307 → 3306 | `mysqladmin ping` |
-| `backend` | siver-backend | siver-backend:1.0 (Maven → Tomcat 11, Java 21) | 8080 | `curl /siver/v3/api-docs` |
+| `backend` | siver-backend | siver-backend:1.0 (Maven → Tomcat 11, Java 25) | 8080 | `curl /siver/v3/api-docs` |
 | `frontend` | siver-frontend | siver-frontend:1.0 (Node → Nginx) | 80 | `wget /salud` |
 
 - **Orden de arranque**: `db` healthy → `backend` healthy → `frontend` (`depends_on` + `condition: service_healthy`).

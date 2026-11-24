@@ -3,7 +3,7 @@
 #
 #  Construccion en dos etapas (multi-stage):
 #    1. "build":  Maven compila y empaqueta target/siver.war
-#    2. final:    imagen oficial de Tomcat 11 con Java 21, solo con el WAR
+#    2. final:    imagen oficial de Tomcat 11 con Java 25, solo con el WAR
 #
 #  La imagen final NO lleva Maven, ni el codigo fuente, ni credenciales:
 #  las variables de entorno (DB_*, JWT_*, CORS_ORIGINS) se pasan al crear
@@ -11,7 +11,7 @@
 # =====================================================================
 
 # ---------- Etapa 1: compilar ----------
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /app
 
 # Primero solo el pom: si no cambian las dependencias, Docker reutiliza esta
@@ -29,7 +29,7 @@ COPY src ./src
 RUN mvn -q -B -DskipTests package
 
 # ---------- Etapa 2: Tomcat 11 ----------
-FROM tomcat:11.0-jdk21-temurin
+FROM tomcat:11.0-jdk25-temurin
 
 ENV TZ=America/Lima \
     JAVA_OPTS="-Duser.timezone=America/Lima -Xms256m -Xmx512m"

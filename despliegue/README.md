@@ -12,7 +12,7 @@ y se comunica con los demás por la red:
 Esta carpeta tiene todo lo necesario para dos escenarios:
 
 - **`servidores/`**: 3 máquinas virtuales o 3 PCs físicas (Escenario 2 o 3, **obligatorio**).
-- **`docker/`**: un contenedor por componente con Docker Compose (Escenario 4, valor agregado).
+- **`docker/`**: un contenedor por componente con Docker Compose: `db`, `backend` y `frontend` (Escenario 4, valor agregado).
 
 ---
 
@@ -135,38 +135,95 @@ fijar la IP de cada PC (o reservarla en el router) y reemplazar `192.168.56.x` p
 
 ---
 
-## 4. Escenario 4: Docker (valor agregado)
+## 4. Escenario 4: Docker Compose (despliegue distribuido en contenedores)
+
+### 4.1 Arquitectura
+
+Tres servicios independientes, cada uno en su propio contenedor, conectados por la red interna
+`siver-red`. Se ubican entre sí por el **nombre del servicio** (`db`, `backend`), nunca por `localhost`.
 
 ```mermaid
 flowchart LR
-    NAV["Navegador"] -- ":80" --> FE["siver-frontend<br/>httpd:2.4 + Angular"]
-    FE -- "proxy /siver/ → :8080" --> BE["siver-backend<br/>Tomcat 11 + siver.war"]
-    BE -- ":3306" --> DB[("siver-db<br/>MySQL 8.4<br/>volumen siver-db-data")]
-    BE -- "SMTP :1025" --> MAIL["siver-mail<br/>Mailpit :8025"]
+    NAV["Navegador<br/>(cualquier PC)"] -- "HTTP :80" --> FE
+
+    subgraph RED["Red Docker: siver-red"]
+        FE["frontend<br/>Nginx 1.27 + Angular<br/>:80"]
+        BE["backend<br/>Tomcat 11 + siver.war<br/>perfil prod · :8080"]
+        DB[("db<br/>MySQL 8.4 · :3306")]
+        VOL[["volumen<br/>siver-db-data"]]
+    end
+
+    FE -- "proxy /api/ → http://backend:8080/siver/api/" --> BE
+    BE -- "jdbc:mysql://db:3306/siver_bd" --> DB
+    DB --- VOL
 ```
+
+| Servicio | Contenedor | Imagen | Puerto publicado | Healthcheck |
+|---|---|---|---|---|
+| `db` | siver-db | mysql:8.4 | 3307 → 3306 | `mysqladmin ping` |
+| `backend` | siver-backend | siver-backend:1.0 (Maven → Tomcat 11, Java 21) | 8080 | `curl /siver/v3/api-docs` |
+| `frontend` | siver-frontend | siver-frontend:1.0 (Node → Nginx) | 80 | `wget /salud` |
+
+- **Orden de arranque**: `db` healthy → `backend` healthy → `frontend` (`depends_on` + `condition: service_healthy`).
+- **Proxy inverso**: el navegador solo habla con Nginx. Nginx reenvía `/api/` al backend, así que la
+  URL de la API en Angular es relativa (`/api`): sin IP fija, sin `localhost` y sin CORS.
+- **Persistencia**: los datos de MySQL viven en el volumen `siver-db-data`.
+- **Correo (opcional)**: `docker compose --profile correo up -d` agrega Mailpit (http://localhost:8025).
+
+### 4.2 Pasos de build y despliegue
 
 ```bash
-# siver-backend y siver-frontend deben estar en la misma carpeta (SIVER/)
+# 0. Requisitos: Docker Desktop encendido; siver-backend y siver-frontend en la misma carpeta (SIVER/)
 cd siver-backend/despliegue/docker
-cp .env.example .env              # cambiar las claves
-docker compose up -d --build
-docker compose ps
+
+# 1. Variables de entorno (una sola vez)
+cp .env.example .env          # cambiar las claves
+
+# 2. Construir las imagenes y levantar los 3 servicios
+docker compose up --build -d
+
+# 3. Verificar
+docker compose ps             # los 3 en "healthy"
+docker compose logs backend   # "The following 1 profile is active: prod" y "Server startup in"
+
+# 4. Abrir http://localhost
+
+# Apagar (conserva los datos) / volver a empezar desde cero
+docker compose down
+docker compose down -v
 ```
 
-| Qué | Dirección |
-|---|---|
-| Sistema | http://localhost |
-| API / Swagger | http://localhost/siver/swagger-ui/index.html |
-| Correos de notificación | http://localhost:8025 |
-| MySQL (Workbench) | `localhost:3307`, usuario y clave del `.env` |
+### 4.3 Variables de entorno (`despliegue/docker/.env`)
 
-- Los datos viven en el **volumen** `siver-db-data`: sobreviven a `docker compose down`.
-  Para empezar de cero: `docker compose down -v`.
-- Las credenciales están en `.env`, **fuera de las imágenes** (`docker image inspect` no las muestra).
-- En Docker, Apache hace de proxy inverso hacia el backend, así que el navegador usa una sola
-  dirección y no hace falta CORS (`npm run build:docker` compila con `HOST: '/siver/api'`).
+| Variable | Para qué sirve | Ejemplo |
+|---|---|---|
+| `DB_ROOT_PASSWORD` | Clave de root de MySQL (solo dentro del contenedor) | (aleatoria) |
+| `DB_NAME` | Base de datos | `siver_bd` |
+| `DB_USER` / `DB_PASSWORD` | Usuario con el que se conecta el backend | `siver_app` / (aleatoria) |
+| `JWT_SECRET` | Clave con la que se firman los tokens (mín. 32 caracteres) | (aleatoria) |
+| `JWT_EXPIRACION_MS` | Duración del token | `28800000` (8 h) |
+| `CORS_ORIGINS` | Orígenes permitidos si se llama a la API en el :8080 | `http://localhost` |
+| `MAIL_HABILITADO` | Envía correos de notificación (perfil `correo`) | `false` |
+| `FRONTEND_PUERTO_HOST`, `BACKEND_PUERTO_HOST`, `DB_PUERTO_HOST` | Puertos publicados en la PC | `80`, `8080`, `3307` |
 
----
+El backend además recibe, desde el `docker-compose.yml`, `SPRING_PROFILES_ACTIVE=prod`, `DB_HOST=db` y `DB_PORT=3306`.
+El `.env` **no se sube al repositorio** y las credenciales **no quedan dentro de las imágenes**.
+
+### 4.4 Relación con el ODS 9 (industria, innovación e infraestructura)
+
+- **Servicios independientes**: frontend, backend y base de datos se actualizan, reinician o escalan
+  por separado. Si el frontend recibe más visitas, se replica solo Nginx (unos 50 MB) y no toda la
+  aplicación, como ocurriría con un monolito.
+- **Uso eficiente de recursos**: los contenedores comparten el kernel del anfitrión (no hay un
+  sistema operativo completo por servicio, como en una VM); las imágenes multi-stage solo llevan
+  lo necesario para ejecutar, y la JVM del backend tiene memoria acotada (`-Xmx512m`).
+- **Menos datos por la red**: Nginx comprime (gzip) y guarda en caché los archivos de Angular;
+  la paginación del servidor limita cada consulta a 50 registros como máximo.
+- **Infraestructura reproducible y resiliente**: el mismo `docker-compose.yml` levanta el sistema
+  igual en cualquier equipo; los healthchecks y `restart: unless-stopped` recuperan un servicio
+  caído; el volumen conserva los datos.
+- **Acceso para una pyme**: Refricentro puede operar con software libre (MySQL, Tomcat, Nginx) en
+  hardware modesto o en un VPS económico, y crecer según la demanda.
 
 ## 5. Usuarios de demostración
 

@@ -11,6 +11,8 @@ rem  Sistema > Configuracion avanzada > Variables de entorno (del sistema)
 rem  y reiniciar el servicio.
 rem =====================================================================
 
+set "SPRING_PROFILES_ACTIVE=prod"
+
 set "DB_HOST=192.168.56.30"
 set "DB_PORT=3306"
 set "DB_NAME=siver_bd"

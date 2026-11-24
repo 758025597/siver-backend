@@ -9,6 +9,9 @@
 #  quedan en el SERVIDOR, no en el codigo ni en el repositorio (req. 4.6).
 # =====================================================================
 
+# --- Perfil de produccion (application-prod.properties) ---
+export SPRING_PROFILES_ACTIVE=prod
+
 # --- Base de datos (VM-BD) ---
 export DB_HOST=192.168.56.30
 export DB_PORT=3306

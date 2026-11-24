@@ -1,5 +1,16 @@
 package com.refricentro.siver.service.impl;
 
+import com.refricentro.siver.model.MovimientoInventario;
+import com.refricentro.siver.model.Producto;
+import com.refricentro.siver.model.Usuario;
+import com.refricentro.siver.model.enums.TipoMovimiento;
+import com.refricentro.siver.repository.MovimientoInventarioRepository;
+import com.refricentro.siver.security.Roles;
+import com.refricentro.siver.security.UsuarioActual;
+import com.refricentro.siver.service.NotificacionService;
+import jakarta.persistence.LockModeType;
+import java.util.stream.Collectors;
+
 
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
 import com.refricentro.siver.model.DetalleVenta;
@@ -39,13 +50,22 @@ public class VentaServiceImpl implements VentaService {
 
     private final VentaRepository ventaRepository;
     private final DetalleVentaRepository detalleVentaRepository;
+    private final MovimientoInventarioRepository movimientoRepository;
+    private final NotificacionService notificacionService;
+    private final UsuarioActual usuarioActual;
     private final EntityManager em;
 
     public VentaServiceImpl(VentaRepository ventaRepository,
                             DetalleVentaRepository detalleVentaRepository,
+                            MovimientoInventarioRepository movimientoRepository,
+                            NotificacionService notificacionService,
+                            UsuarioActual usuarioActual,
                             EntityManager em) {
         this.ventaRepository = ventaRepository;
         this.detalleVentaRepository = detalleVentaRepository;
+        this.movimientoRepository = movimientoRepository;
+        this.notificacionService = notificacionService;
+        this.usuarioActual = usuarioActual;
         this.em = em;
     }
 
@@ -76,6 +96,14 @@ public class VentaServiceImpl implements VentaService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Venta registrar(Venta venta, List<DetalleVenta> detalles) {
+        // Las lineas se guardan UNA por UNA abajo, ya enlazadas a la cabecera.
+        // Si la lista de la entidad trajera algo (ModelMapper, segun la version
+        // de Java, copia ahi las lineas del request aunque se le pida omitirlas),
+        // el cascade = ALL de Venta.detalles intentaria insertar esas copias
+        // incompletas -sin venta, producto ni subtotal- y la venta fallaria con
+        // "Column 'id_venta' cannot be null". Por eso se vacia antes de guardar.
+        venta.getDetalles().clear();
+
         Venta guardada = ventaRepository.save(venta);
 
         for (DetalleVenta detalle : detalles) {
@@ -86,6 +114,11 @@ public class VentaServiceImpl implements VentaService {
 
         em.flush();             // ejecuta los INSERT y dispara los triggers
         em.refresh(guardada);   // relee los totales que calculo MySQL
+
+        // Si algun producto quedo en su stock minimo, avisa (campanita y correo).
+        notificacionService.verificarStockBajo(detalles.stream()
+                .map(d -> d.getProducto().getIdProducto())
+                .collect(Collectors.toSet()));
         return guardada;
     }
 
@@ -121,17 +154,53 @@ public class VentaServiceImpl implements VentaService {
     /**
      * ANULAR es el "borrado" de una venta: la fila se queda, cambia el estado.
      *
-     * Ojo con una cosa: anular NO devuelve el stock. La base no tiene ningun
-     * trigger que lo haga, asi que si se anula una venta el inventario queda
-     * descontado. Si el negocio necesita devolver el stock, hay que registrar
-     * un movimiento de ENTRADA aparte.
+     * Ademas DEVUELVE EL STOCK: por cada linea de la venta suma la cantidad al
+     * producto y deja una ENTRADA en el kardex ("Anulacion de BOLETA B001-25").
+     * La base no tiene un trigger para esto, por eso se hace aqui.
+     *
+     * Todo va en una transaccion: si falla una linea, no se anula nada.
+     * Cada producto se lee con bloqueo (PESSIMISTIC_WRITE = SELECT ... FOR
+     * UPDATE) para que una venta simultanea no lea el stock a medio cambiar.
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Venta anular(Integer id) {
         Venta venta = buscarPorId(id);
+        if (venta.getEstado() == Venta.EstadoVenta.ANULADA) {
+            throw new IllegalArgumentException("La venta ya esta anulada.");
+        }
+
+        Usuario quien = usuarioActual.obtener().orElse(null);
+        String comprobante = venta.getTipoComprobante() + " " + venta.getNumeroComprobante();
+
+        for (DetalleVenta detalle : detalleVentaRepository.findByVenta_IdVenta(id)) {
+            Producto producto = em.find(Producto.class, detalle.getProducto().getIdProducto());
+            em.refresh(producto, LockModeType.PESSIMISTIC_WRITE);
+
+            int anterior = producto.getStock();
+            int nuevo = anterior + detalle.getCantidad();
+            producto.setStock(nuevo);
+
+            MovimientoInventario mov = new MovimientoInventario();
+            mov.setProducto(producto);
+            mov.setUsuario(quien);
+            mov.setVenta(venta);
+            mov.setTipoMovimiento(TipoMovimiento.ENTRADA);
+            mov.setCantidad(detalle.getCantidad());
+            mov.setStockAnterior(anterior);
+            mov.setStockNuevo(nuevo);
+            mov.setMotivo("Anulacion de " + comprobante);
+            movimientoRepository.save(mov);
+        }
+
         venta.setEstado(Venta.EstadoVenta.ANULADA);
-        return ventaRepository.save(venta);
+        Venta anulada = ventaRepository.save(venta);
+
+        notificacionService.notificar("VENTA_ANULADA", "Venta anulada",
+                "Se anulo %s por S/ %s. El stock de sus productos fue devuelto."
+                        .formatted(comprobante, venta.getTotal()),
+                "/pages/ventas/" + id, "venta:" + id, Roles.ADMIN, Roles.VENDEDOR);
+        return anulada;
     }
 
     @Override

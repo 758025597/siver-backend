@@ -1,0 +1,112 @@
+# =====================================================================
+#  SIVER - Despliegue con Docker (Escenario 4, valor agregado)
+#
+#  Un contenedor por componente, conectados por una red interna:
+#
+#    navegador --80--> siver-frontend (Apache httpd + Angular)
+#                          |  proxy /siver/
+#                          v
+#                      siver-backend (Tomcat 11 + siver.war) --3306--> siver-db (MySQL 8.4)
+#                          |
+#                          +--1025 SMTP--> siver-mail (Mailpit, correos de prueba)
+#
+#  Requisito: siver-backend y siver-frontend en la MISMA carpeta:
+#      SIVER/
+#        siver-backend/   <- aqui esta este archivo (despliegue/docker)
+#        siver-frontend/
+#
+#  Uso:
+#      cd siver-backend/despliegue/docker
+#      cp .env.example .env        (y cambia las claves)
+#      docker compose up -d --build
+#
+#  Abrir:  http://localhost            sistema
+#          http://localhost:8025       bandeja de correos (Mailpit)
+#          http://localhost/siver/swagger-ui/index.html
+# =====================================================================
+name: siver
+
+services:
+  siver-db:
+    image: mysql:8.4
+    container_name: siver-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      TZ: America/Lima
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    volumes:
+      # Volumen: los datos sobreviven aunque se borre el contenedor.
+      - siver-db-data:/var/lib/mysql
+      # Scripts que MySQL ejecuta SOLO la primera vez (volumen vacio).
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    ports:
+      # Publicado en 3307 para revisar la base desde la PC (Workbench) y
+      # verificar que los registros creados en la app se guardan (req. 4.9).
+      - "${DB_PUERTO_HOST:-3307}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [siver-red]
+
+  siver-backend:
+    build:
+      context: ../..
+    image: siver-backend:1.0
+    container_name: siver-backend
+    restart: unless-stopped
+    depends_on:
+      siver-db:
+        condition: service_healthy
+    environment:
+      # Las mismas variables que en Tomcat (setenv.sh): nada va en la imagen.
+      DB_HOST: siver-db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRACION_MS: ${JWT_EXPIRACION_MS}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      MAIL_HABILITADO: ${MAIL_HABILITADO}
+      MAIL_HOST: siver-mail
+      MAIL_PORT: 1025
+      MAIL_FROM: ${MAIL_FROM}
+      SHOW_SQL: ${SHOW_SQL:-false}
+    ports:
+      - "${BACKEND_PUERTO_HOST:-8080}:8080"
+    networks: [siver-red]
+
+  siver-frontend:
+    build:
+      context: ../../../siver-frontend
+    image: siver-frontend:1.0
+    container_name: siver-frontend
+    restart: unless-stopped
+    depends_on: [siver-backend]
+    environment:
+      BACKEND_URL: http://siver-backend:8080
+    ports:
+      - "${FRONTEND_PUERTO_HOST:-80}:80"
+    networks: [siver-red]
+
+  siver-mail:
+    image: axllent/mailpit:v1.21
+    container_name: siver-mail
+    restart: unless-stopped
+    ports:
+      - "${MAIL_PUERTO_WEB:-8025}:8025"
+    networks: [siver-red]
+
+volumes:
+  siver-db-data:
+
+networks:
+  siver-red:
+    driver: bridge

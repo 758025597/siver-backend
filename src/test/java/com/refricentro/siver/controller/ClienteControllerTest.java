@@ -18,7 +18,10 @@ import com.refricentro.siver.config.SecurityConfig;
 import com.refricentro.siver.config.ValidationConfig;
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
 import com.refricentro.siver.model.Cliente;
+import com.refricentro.siver.security.AccesoDenegado;
 import com.refricentro.siver.security.DetalleUsuarioService;
+import com.refricentro.siver.security.UsuarioActual;
+import com.refricentro.siver.service.AuditoriaService;
 import com.refricentro.siver.security.JwtUtil;
 import com.refricentro.siver.security.PuntoEntradaNoAutorizado;
 import com.refricentro.siver.service.ClienteService;
@@ -47,7 +50,8 @@ import org.springframework.test.web.servlet.MockMvc;
  * cubren tambien el comportamiento de los otros 8 controladores CRUD.
  */
 @WebMvcTest(ClienteController.class)
-@Import({SecurityConfig.class, PuntoEntradaNoAutorizado.class, MapperConfig.class, ValidationConfig.class})
+@Import({SecurityConfig.class, PuntoEntradaNoAutorizado.class, AccesoDenegado.class,
+        MapperConfig.class, ValidationConfig.class})
 class ClienteControllerTest {
 
     @Autowired
@@ -62,6 +66,13 @@ class ClienteControllerTest {
 
     @MockitoBean
     private DetalleUsuarioService detalleUsuarioService;
+
+    // Los usa el interceptor de auditoria, que corre en cada POST/PUT/DELETE.
+    @MockitoBean
+    private AuditoriaService auditoriaService;
+
+    @MockitoBean
+    private UsuarioActual usuarioActual;
 
     private static Cliente cliente(int id, String nombres) {
         Cliente c = new Cliente();
@@ -80,7 +91,7 @@ class ClienteControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMINISTRADOR")
     void paginado_devuelveTotalesYUsaPageYSize() throws Exception {
         Pageable pedida = PageRequest.of(1, 2);
         given(clienteService.listarPaginado(isNull(), any(Pageable.class)))
@@ -100,7 +111,7 @@ class ClienteControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMINISTRADOR")
     void paginado_pasaElTextoDeBusquedaAlServicio() throws Exception {
         given(clienteService.listarPaginado(eq("ana"), any(Pageable.class)))
                 .willReturn(new PageImpl<>(List.of(cliente(3, "Ana")), PageRequest.of(0, 10), 1));
@@ -111,7 +122,7 @@ class ClienteControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMINISTRADOR")
     void buscarPorId_inexistente_responde404() throws Exception {
         given(clienteService.buscarPorId(99)).willThrow(new RecursoNoEncontradoException("Cliente", 99));
 
@@ -121,7 +132,7 @@ class ClienteControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMINISTRADOR")
     void crear_valido_responde201ConLocation() throws Exception {
         given(clienteService.crear(any(Cliente.class))).willReturn(cliente(7, "Rosa Quispe"));
 
@@ -137,7 +148,7 @@ class ClienteControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMINISTRADOR")
     void crear_invalido_responde400ConLosCampos() throws Exception {
         mvc.perform(post("/api/clientes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -152,7 +163,7 @@ class ClienteControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMINISTRADOR")
     void eliminar_responde204() throws Exception {
         mvc.perform(delete("/api/clientes/7"))
                 .andExpect(status().isNoContent());
@@ -176,5 +187,13 @@ class ClienteControllerTest {
                 .options("/api/clientes")
                 .header("Origin", origen)
                 .header("Access-Control-Request-Method", "GET");
+    }
+
+    @Test
+    @WithMockUser(roles = "TECNICO")
+    void tecnicoNoPuedeEliminarClientes_responde403() throws Exception {
+        mvc.perform(delete("/api/clientes/1"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.estado").value(403));
     }
 }

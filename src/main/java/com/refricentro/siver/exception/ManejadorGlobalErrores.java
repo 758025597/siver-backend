@@ -147,6 +147,20 @@ public class ManejadorGlobalErrores {
                         "Este recurso no admite " + ex.getMethod() + "." + permitidos));
     }
 
+    /**
+     * 403 - el rol del usuario no alcanza (un @PreAuthorize que no se cumple).
+     *
+     * Sin este handler, la excepcion caeria en el generico de abajo y saldria
+     * como 500, cuando en realidad es un "no tienes permiso".
+     */
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorRespuesta> sinPermiso(
+            org.springframework.security.access.AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ErrorRespuesta.de(403, "Prohibido",
+                        "Tu rol no tiene permiso para realizar esta accion."));
+    }
+
     /** 500 - cualquier otra cosa no prevista. */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorRespuesta> general(Exception ex) {

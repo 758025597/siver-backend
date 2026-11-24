@@ -3,8 +3,12 @@ package com.refricentro.siver.controller;
 import com.refricentro.siver.dto.LoginRequest;
 import com.refricentro.siver.dto.LoginResponse;
 import com.refricentro.siver.exception.ErrorRespuesta;
+import com.refricentro.siver.model.Auditoria;
 import com.refricentro.siver.model.Usuario;
+import com.refricentro.siver.service.AuditoriaService;
+import jakarta.servlet.http.HttpServletRequest;
 import com.refricentro.siver.security.JwtUtil;
+import com.refricentro.siver.security.Roles;
 import com.refricentro.siver.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,6 +46,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UsuarioService usuarioService;
+    private final AuditoriaService auditoriaService;
 
     /**
      * POST /api/auth/login
@@ -65,13 +70,16 @@ public class AuthController {
             content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     @ApiResponse(responseCode = "401", description = "Correo o clave incorrectos, o cuenta desactivada")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request,
+                                   HttpServletRequest httpRequest) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getCorreo(), request.getClave()));
         } catch (DisabledException e) {
+            auditar("LOGIN_FALLIDO", request.getCorreo(), null, null, 401, httpRequest);
             return ResponseEntity.status(401).body(error("La cuenta esta desactivada"));
         } catch (BadCredentialsException e) {
+            auditar("LOGIN_FALLIDO", request.getCorreo(), null, null, 401, httpRequest);
             return ResponseEntity.status(401).body(error("Correo o clave incorrectos"));
         }
 
@@ -82,12 +90,31 @@ public class AuthController {
         usuario.setUltimoAcceso(LocalDateTime.now());
         usuarioService.registrarAcceso(usuario);
 
-        String token = jwtUtil.generarToken(usuario.getCorreo(), rol.toUpperCase().replace(' ', '_'));
+        String token = jwtUtil.generarToken(usuario.getCorreo(), Roles.normalizar(rol));
+        auditar("LOGIN", usuario.getCorreo(), usuario.getIdUsuario(), Roles.normalizar(rol), 200, httpRequest);
 
         return ResponseEntity.ok(new LoginResponse(
                 token, "Bearer", jwtUtil.getDuracionMs(),
                 usuario.getIdUsuario(), usuario.getNombres(), usuario.getApellidos(),
-                usuario.getCorreo(), rol));
+                usuario.getCorreo(), rol, Roles.normalizar(rol)));
+    }
+
+    /** Deja constancia de cada intento de inicio de sesion, correcto o no. */
+    private void auditar(String accion, String correo, Integer idUsuario, String rol,
+                         int estado, HttpServletRequest httpRequest) {
+        Auditoria a = new Auditoria();
+        a.setAccion(accion);
+        a.setUsuario(correo == null ? "desconocido"
+                : correo.length() > 120 ? correo.substring(0, 120) : correo);
+        a.setIdUsuario(idUsuario);
+        a.setRol(rol);
+        a.setModulo("auth");
+        a.setMetodo("POST");
+        a.setRuta("/api/auth/login");
+        a.setEstadoHttp(estado);
+        String ip = httpRequest.getHeader("X-Forwarded-For");
+        a.setIp(ip != null && !ip.isBlank() ? ip.split(",")[0].trim() : httpRequest.getRemoteAddr());
+        auditoriaService.registrar(a);
     }
 
     private java.util.Map<String, Object> error(String mensaje) {

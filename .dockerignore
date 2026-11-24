@@ -1,0 +1,13 @@
+# Lo que NO se manda a Docker al construir la imagen
+.git
+.github
+.vscode
+.idea
+.mvn/wrapper/maven-wrapper.jar
+target
+despliegue
+docs
+*.md
+# Credenciales locales: nunca dentro de una imagen
+.env
+.env.*

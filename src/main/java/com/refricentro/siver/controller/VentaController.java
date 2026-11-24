@@ -1,5 +1,7 @@
 package com.refricentro.siver.controller;
 
+import com.refricentro.siver.security.UsuarioActual;
+
 import com.refricentro.siver.dto.DetalleVentaRequest;
 import com.refricentro.siver.dto.DetalleVentaResponse;
 import com.refricentro.siver.dto.PaginaResponse;
@@ -67,6 +69,7 @@ public class VentaController {
     private final ClienteService clienteService;
     private final UsuarioService usuarioService;
     private final ProductoService productoService;
+    private final UsuarioActual usuarioActual;
 
     @Qualifier("ventaMapper")
     private final ModelMapper mapper;
@@ -126,7 +129,10 @@ public class VentaController {
 
         // Se validan de verdad: si no existen, responde 404 y no 409.
         venta.setCliente(clienteService.buscarPorId(request.getIdCliente()));
-        venta.setUsuario(usuarioService.buscarPorId(request.getIdUsuario()));
+        // El vendedor es quien inicio sesion (sale del JWT). El idUsuario del
+        // cuerpo solo se usa si no hay sesion, por ejemplo en pruebas.
+        venta.setUsuario(usuarioActual.obtener()
+                .orElseGet(() -> usuarioService.buscarPorId(request.getIdUsuario())));
 
         List<DetalleVenta> detalles = request.getDetalles().stream()
                 .map(this::aDetalle)
@@ -146,7 +152,8 @@ public class VentaController {
      * Este es el "borrado" de una venta. La fila no se toca: pasa a ANULADA.
      * Un comprobante tributario no se elimina, se anula.
      */
-    @Operation(summary = "Anula un comprobante (estado = ANULADA)")
+    @Operation(summary = "Anula un comprobante y devuelve el stock",
+            description = "Solo ADMINISTRADOR. Registra una ENTRADA en el kardex por cada producto de la venta.")
     @PatchMapping("/{id}/anular")
     public ResponseEntity<VentaResponse> anular(@PathVariable Integer id) {
         return ResponseEntity.ok(aRespuesta(ventaService.anular(id)));

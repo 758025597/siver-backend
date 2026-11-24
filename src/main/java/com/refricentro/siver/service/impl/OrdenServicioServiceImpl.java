@@ -1,6 +1,9 @@
 
 package com.refricentro.siver.service.impl;
 
+import com.refricentro.siver.security.Roles;
+import com.refricentro.siver.service.NotificacionService;
+
 import com.refricentro.siver.exception.RecursoNoEncontradoException;
 import com.refricentro.siver.model.EstadoOrden;
 import com.refricentro.siver.model.OrdenServicio;
@@ -26,12 +29,15 @@ public class OrdenServicioServiceImpl
 
     private final OrdenServicioRepository ordenServicioRepository;
     private final EstadoOrdenRepository estadoOrdenRepository;
+    private final NotificacionService notificacionService;
 
     public OrdenServicioServiceImpl(
             OrdenServicioRepository ordenServicioRepository,
-            EstadoOrdenRepository estadoOrdenRepository) {
+            EstadoOrdenRepository estadoOrdenRepository,
+            NotificacionService notificacionService) {
         this.ordenServicioRepository = ordenServicioRepository;
         this.estadoOrdenRepository = estadoOrdenRepository;
+        this.notificacionService = notificacionService;
     }
 
     @Override
@@ -76,7 +82,19 @@ public class OrdenServicioServiceImpl
                 .orElseThrow(() ->
                         new RecursoNoEncontradoException("EstadoOrden", idEstado));
         orden.setEstado(estado);
-        return ordenServicioRepository.save(orden);
+        OrdenServicio guardada = ordenServicioRepository.save(orden);
+
+        // Un estado final que no sea "Cancelado" = el equipo esta listo.
+        if (Boolean.TRUE.equals(estado.getEsFinal())
+                && !ESTADO_CANCELADO.equalsIgnoreCase(estado.getNombre())) {
+            notificacionService.notificar("ORDEN_FINALIZADA", "Equipo listo para entregar",
+                    "La orden %s (%s de %s) paso a '%s'. Avisa al cliente para el recojo."
+                            .formatted(orden.getNumeroOrden(), orden.getEquipo(),
+                                    orden.getCliente().getNombres(), estado.getNombre()),
+                    "/pages/ordenes-servicio", "orden-fin:" + idOrden,
+                    Roles.ADMIN, Roles.VENDEDOR, Roles.TECNICO);
+        }
+        return guardada;
     }
 
     @Override

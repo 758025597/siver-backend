@@ -1,5 +1,12 @@
 package com.refricentro.siver.controller;
 
+import com.refricentro.siver.dto.MovimientoInventarioRequest;
+import jakarta.validation.Valid;
+import java.net.URI;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import com.refricentro.siver.dto.MovimientoInventarioResponse;
 import com.refricentro.siver.dto.PaginaResponse;
 import com.refricentro.siver.exception.ErrorRespuesta;
@@ -27,22 +34,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Consulta de la bitacora de inventario.
+ * Kardex: la bitacora de entradas y salidas de stock.
  *
- * NO hereda de ControladorGenerico, y es a proposito: esa clase trae POST,
- * PUT y DELETE, y aqui las tres estarian de mas.
+ * NO hereda de ControladorGenerico, y es a proposito: esa clase trae PUT y
+ * DELETE, y aqui estarian de mas. Un movimiento nunca se edita ni se borra:
+ * si se borrara se perderia el rastro de por que cambio el stock (y el
+ * borrado seria FISICO, porque esta tabla no tiene columna `activo`).
  *
- * movimiento_inventario es el libro de entradas y salidas de stock. Lo
- * escriben los triggers de MySQL cuando ocurre una venta. Si la API
- * permitiera crear movimientos, se podrian registrar operaciones que nunca
- * pasaron; si permitiera borrarlos, se perderia el rastro de por que cambio
- * el stock. Y el borrado seria FISICO, porque esta tabla no tiene columna
- * `activo`: la fila desapareceria para siempre.
- *
- * Por eso solo expone GET. Es el ejemplo mas claro del proyecto de que no
- * todas las entidades necesitan las 4 operaciones del CRUD.
+ * Quien escribe aqui:
+ *   - el trigger de MySQL, en cada venta (SALIDA)
+ *   - VentaServiceImpl.anular(), al devolver el stock (ENTRADA)
+ *   - POST de este controlador: entradas, salidas y ajustes manuales,
+ *     solo para el ADMINISTRADOR
  */
-@Tag(name = "Movimientos de inventario", description = "Kardex de solo lectura: lo escriben los triggers de MySQL.")
+@Tag(name = "Movimientos de inventario", description = "Kardex: ventas (trigger), anulaciones y ajustes manuales del administrador.")
 @RestController
 @RequestMapping("/api/movimientos-inventario")
 @RequiredArgsConstructor
@@ -85,6 +90,21 @@ public class MovimientoInventarioController {
             @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(PaginaResponse.de(
                 servicio.listarPaginado(buscar, tipo, idProducto, pageable), this::aRespuesta));
+    }
+
+    /** POST /api/movimientos-inventario - entrada, salida o ajuste manual (solo ADMINISTRADOR). */
+    @Operation(summary = "Registra una entrada, salida o ajuste manual de stock",
+            description = "ENTRADA suma, SALIDA resta y AJUSTE deja el stock en la cantidad contada.")
+    @ApiResponse(responseCode = "201", description = "Movimiento registrado y stock actualizado")
+    @ApiResponse(responseCode = "400", description = "Stock insuficiente o datos invalidos",
+            content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
+    @PostMapping
+    public ResponseEntity<MovimientoInventarioResponse> registrar(
+            @Valid @RequestBody MovimientoInventarioRequest request) {
+        MovimientoInventario creado = servicio.registrarManual(request);
+        URI ubicacion = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}").buildAndExpand(creado.getIdMovimiento()).toUri();
+        return ResponseEntity.created(ubicacion).body(aRespuesta(creado));
     }
 
     /** GET /api/movimientos-inventario/{id} */

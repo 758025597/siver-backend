@@ -45,4 +45,7 @@ public interface MovimientoInventarioService {
     List<MovimientoInventario> listarPorUsuario(Integer idUsuario);
 
     List<MovimientoInventario> listarPorVenta(Integer idVenta);
+
+    /** Entrada, salida o ajuste manual: actualiza el stock y deja el movimiento en el kardex. */
+    MovimientoInventario registrarManual(com.refricentro.siver.dto.MovimientoInventarioRequest request);
 }

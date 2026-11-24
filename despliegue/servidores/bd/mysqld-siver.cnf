@@ -1,0 +1,17 @@
+# =====================================================================
+#  VM-BD: MySQL escuchando en la red (no solo en localhost)
+#
+#  Ubuntu:   /etc/mysql/mysql.conf.d/mysqld-siver.cnf
+#  Windows:  agregar estas lineas en la seccion [mysqld] de
+#            C:\ProgramData\MySQL\MySQL Server 8.x\my.ini
+#  Despues:  sudo systemctl restart mysql   (o reiniciar el servicio MySQL80)
+# =====================================================================
+[mysqld]
+# 0.0.0.0 = acepta conexiones por cualquier interfaz de red. Quien puede
+# entrar lo controlan el usuario 'siver_app'@'IP-backend' y el firewall.
+bind-address = 0.0.0.0
+port         = 3306
+
+character-set-server = utf8mb4
+collation-server     = utf8mb4_0900_ai_ci
+default-time-zone    = '-05:00'

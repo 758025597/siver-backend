@@ -5,6 +5,8 @@ import com.refricentro.siver.exception.RecursoNoEncontradoException;
 import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.service.CrudService;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 public abstract class ServicioGenerico<T, ID> implements CrudService<T, ID> {
@@ -14,6 +16,21 @@ public abstract class ServicioGenerico<T, ID> implements CrudService<T, ID> {
     protected abstract String nombreRecurso();
 
     protected abstract void copiarDatos(T origen, T destino);
+
+    /**
+     * La busqueda por texto de cada entidad. Cada servicio la implementa
+     * llamando a su consulta JPQL (ver el @Query de su repositorio).
+     */
+    protected abstract Page<T> buscar(String texto, Pageable pageable);
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<T> listarPaginado(String filtro, Pageable pageable) {
+        if (filtro == null || filtro.isBlank()) {
+            return getRepo().findAll(pageable);
+        }
+        return buscar(filtro.trim(), pageable);
+    }
 
     @Override
     @Transactional

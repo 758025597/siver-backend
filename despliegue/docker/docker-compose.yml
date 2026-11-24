@@ -1,0 +1,135 @@
+# =====================================================================
+#  SIVER - Despliegue distribuido con Docker Compose
+#
+#  Tres servicios independientes, cada uno en su contenedor, comunicados
+#  por la red interna "siver-red" usando el NOMBRE DEL SERVICIO como host:
+#
+#    navegador --:80--> frontend (Nginx + Angular)
+#                          |  proxy /api/  ->  http://backend:8080/siver/api/
+#                          v
+#                       backend (Tomcat 11 + siver.war) --jdbc:mysql://db:3306--> db (MySQL 8.4)
+#
+#  Orden de arranque (depends_on + healthcheck):
+#      db (healthy)  ->  backend (healthy)  ->  frontend
+#
+#  Opcional: servidor de correo de pruebas (Mailpit) con el perfil "correo":
+#      docker compose --profile correo up -d
+#
+#  Requisito: siver-backend y siver-frontend en la MISMA carpeta (SIVER/).
+#
+#  Uso:
+#      cd siver-backend/despliegue/docker
+#      cp .env.example .env            (y cambiar las claves)
+#      docker compose up --build -d
+#      docker compose ps
+# =====================================================================
+name: siver
+
+services:
+
+  # ---------------------------------------------------------- base de datos
+  db:
+    image: mysql:8.4
+    container_name: siver-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      TZ: America/Lima
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    volumes:
+      # Volumen persistente: los datos sobreviven aunque se borre el contenedor.
+      - siver-db-data:/var/lib/mysql
+      # Esquema, triggers, datos iniciales y tablas del EF. MySQL los ejecuta
+      # en orden (01, 02, 03) SOLO la primera vez, con el volumen vacio.
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    ports:
+      # Publicado en 3307 para revisar la base desde la PC con Workbench
+      # (verificar que lo creado en la app se guarda: requisito 4.9).
+      - "${DB_PUERTO_HOST:-3307}:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [siver-red]
+
+  # ---------------------------------------------------------------- backend
+  backend:
+    build:
+      context: ../..
+    image: siver-backend:1.0
+    container_name: siver-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Perfil de produccion: application-prod.properties
+      SPRING_PROFILES_ACTIVE: prod
+      # Conexion a MySQL por el NOMBRE DEL SERVICIO (db), no por localhost.
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Seguridad
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRACION_MS: ${JWT_EXPIRACION_MS}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      # Correo (solo si se levanta el perfil "correo")
+      MAIL_HABILITADO: ${MAIL_HABILITADO:-false}
+      MAIL_HOST: mail
+      MAIL_PORT: 1025
+      MAIL_FROM: ${MAIL_FROM:-siver@refricentro.pe}
+      SHOW_SQL: ${SHOW_SQL:-false}
+    ports:
+      # Publicado para probar la API directamente (Swagger, Postman).
+      - "${BACKEND_PUERTO_HOST:-8080}:8080"
+    healthcheck:
+      # Responde 200 cuando Spring termino de arrancar dentro de Tomcat.
+      test: ["CMD-SHELL", "curl -fs -o /dev/null http://127.0.0.1:8080/siver/v3/api-docs || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks: [siver-red]
+
+  # --------------------------------------------------------------- frontend
+  frontend:
+    build:
+      context: ../../../siver-frontend
+    image: siver-frontend:1.0
+    container_name: siver-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PUERTO_HOST:-80}:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/salud || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+    networks: [siver-red]
+
+  # ------------------------------------------- correo de pruebas (opcional)
+  mail:
+    image: axllent/mailpit:v1.21
+    container_name: siver-mail
+    profiles: ["correo"]
+    restart: unless-stopped
+    ports:
+      - "${MAIL_PUERTO_WEB:-8025}:8025"
+    networks: [siver-red]
+
+volumes:
+  siver-db-data:
+
+networks:
+  siver-red:
+    driver: bridge

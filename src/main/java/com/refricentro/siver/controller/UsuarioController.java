@@ -5,6 +5,8 @@ import com.refricentro.siver.dto.UsuarioResponse;
 import com.refricentro.siver.model.Usuario;
 import com.refricentro.siver.service.RolService;
 import com.refricentro.siver.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * La clave NO se devuelve nunca: UsuarioResponse no tiene ese campo.
  */
+@Tag(name = "Usuarios", description = "Usuarios del sistema. La clave nunca se devuelve.")
 @RestController
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
@@ -69,6 +72,7 @@ public class UsuarioController
     }
 
     /** GET /api/usuarios/activos - solo los vigentes. */
+    @Operation(summary = "Lista solo los registros activos (para combos)")
     @GetMapping("/activos")
     public ResponseEntity<List<UsuarioResponse>> listarActivos() {
         return ResponseEntity.ok(aRespuestas(usuarioService.listarActivos()));

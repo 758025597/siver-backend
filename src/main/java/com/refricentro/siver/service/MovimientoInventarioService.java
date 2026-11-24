@@ -1,7 +1,10 @@
 package com.refricentro.siver.service;
 
 import com.refricentro.siver.model.MovimientoInventario;
+import com.refricentro.siver.model.enums.TipoMovimiento;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Consultas sobre la bitacora de inventario.
@@ -25,6 +28,16 @@ public interface MovimientoInventarioService {
 
     List<MovimientoInventario> listar();
 
+    /**
+     * Una pagina del kardex.
+     *
+     * @param texto      codigo/nombre del producto o motivo (vacio = sin filtro)
+     * @param tipo       ENTRADA, SALIDA o AJUSTE (null = todos)
+     * @param idProducto solo los de ese producto (null = todos)
+     */
+    Page<MovimientoInventario> listarPaginado(String texto, TipoMovimiento tipo, Integer idProducto,
+                                              Pageable pageable);
+
     MovimientoInventario buscarPorId(Integer id);
 
     List<MovimientoInventario> listarPorProducto(Integer idProducto);
@@ -32,4 +45,7 @@ public interface MovimientoInventarioService {
     List<MovimientoInventario> listarPorUsuario(Integer idUsuario);
 
     List<MovimientoInventario> listarPorVenta(Integer idVenta);
+
+    /** Entrada, salida o ajuste manual: actualiza el stock y deja el movimiento en el kardex. */
+    MovimientoInventario registrarManual(com.refricentro.siver.dto.MovimientoInventarioRequest request);
 }

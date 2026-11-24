@@ -44,9 +44,6 @@ public class DetalleUsuarioService implements UserDetailsService {
 
     /** ADMINISTRADOR, VENDEDOR, TECNICO... en mayusculas y sin espacios. */
     private String nombreRol(Usuario usuario) {
-        if (usuario.getRol() == null || usuario.getRol().getNombre() == null) {
-            return "SIN_ROL";
-        }
-        return usuario.getRol().getNombre().toUpperCase().replace(' ', '_');
+        return Roles.normalizar(usuario.getRol() == null ? null : usuario.getRol().getNombre());
     }
 }

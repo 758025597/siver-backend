@@ -1,6 +1,8 @@
 package com.refricentro.siver.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Contrato CRUD que cumplen todos los servicios del proyecto.
@@ -15,6 +17,14 @@ public interface CrudService<T, ID> {
 
     /** R - devuelve todos los registros. */
     List<T> listar();
+
+    /**
+     * R - devuelve UNA pagina de registros (la primera es la 0).
+     *
+     * @param filtro   texto a buscar; si viene vacio, no se filtra
+     * @param pageable pagina, tamano y orden que pidio el cliente
+     */
+    Page<T> listarPaginado(String filtro, Pageable pageable);
 
     /** R - devuelve uno por su id. Lanza RecursoNoEncontradoException si no existe. */
     T buscarPorId(ID id);

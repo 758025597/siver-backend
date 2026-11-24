@@ -4,6 +4,8 @@ import com.refricentro.siver.dto.ClienteRequest;
 import com.refricentro.siver.dto.ClienteResponse;
 import com.refricentro.siver.model.Cliente;
 import com.refricentro.siver.service.ClienteService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Clientes", description = "Clientes con DNI, RUC o CE. DELETE es logico.")
 @RestController
 @RequestMapping("/api/clientes")
 @RequiredArgsConstructor
@@ -40,6 +43,7 @@ public class ClienteController
     }
 
     /** GET /api/clientes/activos - solo los vigentes, para los combos del frontend. */
+    @Operation(summary = "Lista solo los registros activos (para combos)")
     @GetMapping("/activos")
     public ResponseEntity<List<ClienteResponse>> listarActivos() {
         return ResponseEntity.ok(aRespuestas(servicio.listarActivos()));

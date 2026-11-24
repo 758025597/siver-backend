@@ -27,4 +27,6 @@ public class LoginResponse {
     private String apellidos;
     private String correo;
     private String rol;
+    /** El rol normalizado (ADMINISTRADOR, VENDEDOR, TECNICO): el que usa Angular para los menus. */
+    private String codigoRol;
 }

@@ -35,3 +35,7 @@ build/
 ### Local ###
 .DS_Store
 application-local.properties
+
+### Variables de entorno (credenciales) ###
+.env
+!.env.example

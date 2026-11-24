@@ -7,6 +7,8 @@ import com.refricentro.siver.repository.IGenericRepository;
 import com.refricentro.siver.repository.UsuarioRepository;
 import com.refricentro.siver.service.UsuarioService;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +64,12 @@ public class UsuarioServiceImpl extends ServicioSoftDelete<Usuario, Integer>
     @Override
     @Transactional
     public void registrarAcceso(Usuario usuario) {
-        usuarioRepository.save(usuario);
+        usuarioRepository.actualizarUltimoAcceso(usuario.getIdUsuario(), usuario.getUltimoAcceso());
+    }
+
+    @Override
+    protected Page<Usuario> buscar(String texto, Pageable pageable) {
+        return usuarioRepository.buscar(texto, pageable);
     }
 
     @Override

@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -62,6 +64,42 @@ public class ManejadorGlobalErrores {
     }
 
     /**
+     * 400 - falta un parametro obligatorio de la URL.
+     *
+     * Pasa con /api/ordenes-servicio/rango-fechas sin ?desde= o sin ?hasta=.
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorRespuesta> parametroFaltante(MissingServletRequestParameterException ex) {
+        return ResponseEntity.badRequest()
+                .body(ErrorRespuesta.de(400, "Parametro faltante",
+                        "Falta el parametro '" + ex.getParameterName() + "'"));
+    }
+
+    /**
+     * 400 - un dato que llega bien escrito pero no tiene sentido, por ejemplo
+     * un rango de fechas donde 'desde' es posterior a 'hasta'. Lo lanzan los
+     * servicios con un mensaje pensado para el usuario.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorRespuesta> argumentoInvalido(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest()
+                .body(ErrorRespuesta.de(400, "Dato invalido", ex.getMessage()));
+    }
+
+    /**
+     * 400 - se pidio ordenar por un campo que la entidad no tiene.
+     *
+     * Pasa con /api/clientes/paginado?sort=noExiste,asc. Sin este handler se
+     * iba al 500 generico, cuando el error es del que hizo la peticion.
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ErrorRespuesta> ordenInvalido(PropertyReferenceException ex) {
+        return ResponseEntity.badRequest()
+                .body(ErrorRespuesta.de(400, "Orden invalido",
+                        "No se puede ordenar por '" + ex.getPropertyName() + "'"));
+    }
+
+    /**
      * 409 - choca con una restriccion de la base de datos.
      *
      * En este proyecto se dispara sobre todo por:
@@ -107,6 +145,20 @@ public class ManejadorGlobalErrores {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ErrorRespuesta.de(405, "Metodo no permitido",
                         "Este recurso no admite " + ex.getMethod() + "." + permitidos));
+    }
+
+    /**
+     * 403 - el rol del usuario no alcanza (un @PreAuthorize que no se cumple).
+     *
+     * Sin este handler, la excepcion caeria en el generico de abajo y saldria
+     * como 500, cuando en realidad es un "no tienes permiso".
+     */
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorRespuesta> sinPermiso(
+            org.springframework.security.access.AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ErrorRespuesta.de(403, "Prohibido",
+                        "Tu rol no tiene permiso para realizar esta accion."));
     }
 
     /** 500 - cualquier otra cosa no prevista. */
